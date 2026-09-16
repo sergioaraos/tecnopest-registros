@@ -3,10 +3,15 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "migrate": "node scripts/migrate.js"
   },
   "dependencies": {
+    "better-sqlite3": "^11.3.0",
     "express": "^4.19.2",
     "pdfkit": "^0.15.2"
+  },
+  "allowScripts": {
+    "better-sqlite3@11.10.0": true
   }
 }
