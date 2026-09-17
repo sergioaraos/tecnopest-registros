@@ -1,10 +1,88 @@
-<%# SERGIO 2026-09-17: pantalla de inicio del panel de administracion, con accesos a cada catalogo. %>
+<%# SERGIO 2026-09-17: pantalla de inicio del panel de administracion, con accesos a cada %>
+<%# catalogo como tarjetas con icono, en vez de una simple lista de links. %>
 <%- include('../partials/header', { titulo: 'Inicio' }) %>
 <h1>Administracion</h1>
-<ul>
-  <li><a href="/admin/clientes">Clientes y direcciones</a></li>
-  <li><a href="/admin/productos">Productos</a></li>
-  <li><a href="/admin/tipos-servicio">Tipos de servicio</a></li>
-  <li><a href="/admin/operadores">Operadores</a></li>
-</ul>
+<style>
+  .tarjetas-inicio {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+  }
+  .tarjeta-inicio {
+    background: #fff;
+    border: 1px solid #e6e6e6;
+    border-radius: 10px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    text-decoration: none;
+    color: #222;
+    font-weight: 600;
+    font-size: 15px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+  }
+  .tarjeta-inicio:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+    border-color: var(--verde-claro);
+  }
+  .tarjeta-inicio .icono {
+    width: 44px; height: 44px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #8fd85b26, #2ea34a26);
+    color: #2ea34a;
+  }
+</style>
+<div class="tarjetas-inicio">
+  <a class="tarjeta-inicio" href="/admin/clientes">
+    <span class="icono">
+      <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="4" y="2.5" width="16" height="19"/>
+        <rect x="9" y="16.5" width="6" height="5"/>
+        <rect x="7" y="6" width="3" height="3"/>
+        <rect x="14" y="6" width="3" height="3"/>
+        <rect x="7" y="11" width="3" height="3"/>
+        <rect x="14" y="11" width="3" height="3"/>
+      </svg>
+    </span>
+    Clientes y direcciones
+  </a>
+  <a class="tarjeta-inicio" href="/admin/productos">
+    <span class="icono">
+      <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 8l9-5 9 5-9 5-9-5z"/>
+        <path d="M3 8v9l9 5 9-5V8"/>
+        <path d="M12 13v9"/>
+      </svg>
+    </span>
+    Productos
+  </a>
+  <a class="tarjeta-inicio" href="/admin/tipos-servicio">
+    <span class="icono">
+      <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="5" y="3.5" width="14" height="18" rx="2"/>
+        <rect x="9" y="2" width="6" height="3" rx="1"/>
+        <line x1="8" y1="10" x2="16" y2="10"/>
+        <line x1="8" y1="14" x2="16" y2="14"/>
+        <line x1="8" y1="18" x2="13" y2="18"/>
+      </svg>
+    </span>
+    Tipos de servicio
+  </a>
+  <a class="tarjeta-inicio" href="/admin/operadores">
+    <span class="icono">
+      <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="9" cy="8" r="3"/>
+        <path d="M3 21v-2a6 6 0 0 1 6-6h0a6 6 0 0 1 6 6v2"/>
+        <circle cx="17" cy="7" r="2.4"/>
+        <path d="M15.5 13.2A5 5 0 0 1 21 18v3"/>
+      </svg>
+    </span>
+    Operadores
+  </a>
+</div>
 <%- include('../partials/footer') %>
