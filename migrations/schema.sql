@@ -57,10 +57,12 @@ CREATE TABLE IF NOT EXISTS operadores (
   activo INTEGER NOT NULL DEFAULT 1
 );
 
+-- SERGIO 2026-09-16: un certificado corresponde siempre a una sola direccion del cliente
 CREATE TABLE IF NOT EXISTS certificados (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   numero INTEGER NOT NULL UNIQUE,
   cliente_id INTEGER NOT NULL REFERENCES clientes(id),
+  direccion_id INTEGER NOT NULL REFERENCES direcciones(id),
   fecha_aplicacion TEXT NOT NULL,
   recomendaciones TEXT,
   diagnostico_previo TEXT,
