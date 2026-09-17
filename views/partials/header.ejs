@@ -6,43 +6,75 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title><%= titulo %> - TecnoPest Registros</title>
 <style>
-  body { font-family: system-ui, sans-serif; margin: 0; background: #f5f5f5; color: #222; }
-  nav { background: #1b5e20; padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
-  nav a { color: #fff; text-decoration: none; font-size: 14px; }
-  nav a:hover { text-decoration: underline; }
-  nav .marca { font-weight: bold; margin-right: 16px; }
+  <%# SERGIO 2026-09-17: verde degradado tomado del logo real de TecnoPest (la "t"), de
+  claro #8fd85b a oscuro #2ea34a. La barra de navegacion es oscura (como el fondo de la
+  firma de correo) para que el logo se vea con buen contraste; antes se perdia porque el
+  fondo azul era muy parecido al del logo. %>
+  body {
+    --verde-claro: #8fd85b; --verde-oscuro: #2ea34a;
+    font-family: system-ui, sans-serif; margin: 0; background: #f5f5f5; color: #222;
+  }
+  nav {
+    background: #121212; color: #fff; padding: 12px 20px; display: flex; flex-wrap: wrap;
+    gap: 16px; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+  nav a { color: #fff; text-decoration: none; font-size: 14px; opacity: 0.85; transition: opacity 0.15s, color 0.15s; }
+  nav a:hover { opacity: 1; color: var(--verde-claro); }
+  nav .marca { font-weight: bold; margin-right: 16px; color: #fff; text-decoration: none; transition: color 0.15s; }
+  nav .marca:hover { color: var(--verde-claro); }
+  <%# SERGIO 2026-09-17: menu colapsable en pantallas angostas (celular). El boton
+  hamburguesa solo se ve bajo los 720px, y muestra/oculta .nav-links con una clase. %>
+  .nav-links { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; flex: 1; }
+  .salir-form { margin-left: auto; display: inline; }
+  .menu-toggle {
+    display: none; background: none; border: none; color: #fff; font-size: 24px;
+    cursor: pointer; padding: 0 4px; line-height: 1;
+  }
+  @media (max-width: 720px) {
+    .menu-toggle { display: block; margin-left: auto; }
+    .nav-links { display: none; flex-direction: column; align-items: flex-start; width: 100%; gap: 12px; margin-top: 12px; flex: none; }
+    .nav-links.abierto { display: flex; }
+    .salir-form { margin-left: 0; }
+  }
   main { max-width: 900px; margin: 0 auto; padding: 16px; }
   h1 { font-size: 20px; }
   table { width: 100%; border-collapse: collapse; background: #fff; }
   th, td { padding: 8px; border-bottom: 1px solid #ddd; text-align: left; font-size: 14px; }
-  .tabla-wrap { overflow-x: auto; }
-  form.formulario { background: #fff; padding: 16px; max-width: 500px; }
+  .tabla-wrap { overflow-x: auto; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  form.formulario { background: #fff; padding: 20px; max-width: 500px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
   form.formulario label { display: block; margin-top: 10px; font-size: 14px; font-weight: bold; }
   form.formulario input, form.formulario select, form.formulario textarea {
     width: 100%; padding: 8px; margin-top: 4px; box-sizing: border-box; font-size: 14px;
   }
   .botones { margin-top: 16px; display: flex; gap: 8px; }
   button, .boton {
-    background: #1b5e20; color: #fff; border: none; padding: 8px 14px; border-radius: 4px;
-    cursor: pointer; text-decoration: none; font-size: 14px; display: inline-block;
+    background: linear-gradient(135deg, var(--verde-claro), var(--verde-oscuro));
+    color: #0d2818; border: none; padding: 9px 16px; border-radius: 6px;
+    cursor: pointer; text-decoration: none; font-size: 14px; display: inline-block; font-weight: 600;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15); transition: transform 0.1s ease, box-shadow 0.1s ease;
   }
-  button.secundario, .boton.secundario { background: #757575; }
-  button.peligro, .boton.peligro { background: #b71c1c; }
+  button:hover, .boton:hover { transform: translateY(-1px); box-shadow: 0 3px 8px rgba(0,0,0,0.2); }
+  button.secundario, .boton.secundario { background: #757575; color: #fff; }
+  button.peligro, .boton.peligro { background: #b71c1c; color: #fff; }
   .error { background: #ffebee; color: #b71c1c; padding: 8px 12px; margin-bottom: 12px; border-radius: 4px; font-size: 14px; }
   .inactivo { color: #999; font-style: italic; }
   .acciones a { margin-right: 10px; font-size: 13px; }
+  main a:not(.boton) { color: #1f7a37; }
 </style>
 </head>
 <body>
 <nav>
-  <span class="marca">TecnoPest Admin</span>
-  <a href="/admin">Inicio</a>
-  <a href="/admin/clientes">Clientes</a>
-  <a href="/admin/productos">Productos</a>
-  <a href="/admin/tipos-servicio">Tipos de servicio</a>
-  <a href="/admin/operadores">Operadores</a>
-  <form method="POST" action="/logout" style="margin-left:auto;display:inline">
-    <button type="submit" style="background:none;border:none;color:#fff;text-decoration:underline;cursor:pointer;font-size:14px;padding:0;">Cerrar sesion</button>
-  </form>
+  <a class="marca" href="/admin"><img src="/img/logo.png" alt="TecnoPest" style="height:32px;vertical-align:middle;margin-right:8px;">Admin</a>
+  <button type="button" class="menu-toggle" aria-label="Abrir menu" aria-controls="nav-links" onclick="document.getElementById('nav-links').classList.toggle('abierto')">&#9776;</button>
+  <div class="nav-links" id="nav-links">
+    <a href="/admin">Inicio</a>
+    <a href="/admin/clientes">Clientes</a>
+    <a href="/admin/productos">Productos</a>
+    <a href="/admin/tipos-servicio">Tipos de servicio</a>
+    <a href="/admin/operadores">Operadores</a>
+    <form method="POST" action="/logout" class="salir-form">
+      <button type="submit" style="background:none;border:none;color:#fff;text-decoration:underline;cursor:pointer;font-size:14px;padding:0;">Cerrar sesion</button>
+    </form>
+  </div>
 </nav>
 <main>
