@@ -26,5 +26,18 @@ if (!tieneDireccionId) {
   console.log('Columna direccion_id agregada a certificados');
 }
 
+// SERGIO 2026-09-17: ajuste para bases de datos creadas antes de agregar las marcas
+// automaticas de apertura/guardado del formulario de registro de visita.
+const columnasRegistros = db.prepare("PRAGMA table_info(registros_visita)").all();
+const nombresRegistros = columnasRegistros.map((c) => c.name);
+if (!nombresRegistros.includes('hora_apertura_formulario')) {
+  db.exec("ALTER TABLE registros_visita ADD COLUMN hora_apertura_formulario TEXT NOT NULL DEFAULT ''");
+  console.log('Columna hora_apertura_formulario agregada a registros_visita');
+}
+if (!nombresRegistros.includes('hora_guardado_formulario')) {
+  db.exec("ALTER TABLE registros_visita ADD COLUMN hora_guardado_formulario TEXT NOT NULL DEFAULT ''");
+  console.log('Columna hora_guardado_formulario agregada a registros_visita');
+}
+
 console.log('Migracion aplicada correctamente en ' + dbPath);
 db.close();
