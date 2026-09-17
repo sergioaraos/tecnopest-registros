@@ -1,12 +1,14 @@
 const express = require('express');
 const session = require('express-session');
-const Database = require('better-sqlite3');
 const path = require('path');
 const PDFDocument = require('pdfkit');
 const bcrypt = require('bcryptjs');
+const { abrirBaseDeDatos } = require('./db');
 
-// SERGIO 2026-09-16: conexion a la base de datos SQLite, usada por la sesion y las rutas de login
-const db = new Database(path.join(__dirname, 'data', 'tecnopest.db'));
+// SERGIO 2026-09-17: la base de datos se abre con db.js, que crea la carpeta data/ y aplica el
+// esquema si hace falta. Esto permite que el servidor arranque solo en un despliegue nuevo
+// (por ejemplo en Cloudways), sin depender de correr "npm run migrate" a mano.
+const db = abrirBaseDeDatos();
 
 const SqliteStore = require('better-sqlite3-session-store')(session);
 const authRoutes = require('./routes/auth')(db);
