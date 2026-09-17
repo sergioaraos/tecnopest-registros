@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Iniciar sesion - TecnoPest Registros</title>
 <style>
-  body { font-family: system-ui, sans-serif; background: #f5f5f5; margin: 0; display: flex; min-height: 100vh; align-items: center; justify-content: center; }
+  body { font-family: system-ui, sans-serif; background: #f5f5f5; margin: 0; display: flex; flex-direction: column; min-height: 100vh; align-items: center; justify-content: center; }
   .caja { background: #fff; padding: 24px; border-radius: 6px; width: 100%; max-width: 340px; box-sizing: border-box; }
   h1 { font-size: 18px; margin-top: 0; }
   label { display: block; margin-top: 12px; font-size: 14px; font-weight: bold; }
@@ -27,5 +27,8 @@
     <button type="submit">Ingresar</button>
   </form>
 </div>
+<footer style="text-align:center;font-size:11px;color:#999;padding:12px;">
+  Version <%= typeof version !== 'undefined' ? version : 'desconocida' %>
+</footer>
 </body>
 </html>
