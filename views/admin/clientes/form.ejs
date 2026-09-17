@@ -1,0 +1,29 @@
+<%# SERGIO 2026-09-17: formulario para crear/editar un cliente. %>
+<%- include('../../partials/header', { titulo: cliente.id ? 'Editar cliente' : 'Nuevo cliente' }) %>
+<h1><%= cliente.id ? 'Editar cliente' : 'Nuevo cliente' %></h1>
+<% if (error) { %><div class="error"><%= error %></div><% } %>
+<form class="formulario" method="POST" action="<%= cliente.id ? '/admin/clientes/' + cliente.id : '/admin/clientes' %>">
+  <label>Razon social *</label>
+  <input type="text" name="razon_social" value="<%= cliente.razon_social || '' %>" required>
+
+  <label>RUT *</label>
+  <input type="text" name="rut" value="<%= cliente.rut || '' %>" required>
+
+  <label>Representante</label>
+  <input type="text" name="representante" value="<%= cliente.representante || '' %>">
+
+  <label>RUT representante</label>
+  <input type="text" name="rut_representante" value="<%= cliente.rut_representante || '' %>">
+
+  <label>Direccion representante</label>
+  <input type="text" name="direccion_representante" value="<%= cliente.direccion_representante || '' %>">
+
+  <label>Comuna representante</label>
+  <input type="text" name="comuna_representante" value="<%= cliente.comuna_representante || '' %>">
+
+  <div class="botones">
+    <button type="submit">Guardar</button>
+    <a class="boton secundario" href="/admin/clientes">Cancelar</a>
+  </div>
+</form>
+<%- include('../../partials/footer') %>

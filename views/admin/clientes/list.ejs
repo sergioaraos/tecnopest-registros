@@ -1,0 +1,20 @@
+<%# SERGIO 2026-09-17: listado de clientes con acceso a editar y a sus direcciones. %>
+<%- include('../../partials/header', { titulo: 'Clientes' }) %>
+<h1>Clientes</h1>
+<p><a class="boton" href="/admin/clientes/nuevo">+ Nuevo cliente</a></p>
+<div class="tabla-wrap">
+<table>
+<thead><tr><th>Razon social</th><th>RUT</th><th>Direcciones</th><th></th></tr></thead>
+<tbody>
+<% clientes.forEach(function(c) { %>
+  <tr>
+    <td><%= c.razon_social %></td>
+    <td><%= c.rut %></td>
+    <td><a href="/admin/clientes/<%= c.id %>/direcciones">ver direcciones</a></td>
+    <td class="acciones"><a href="/admin/clientes/<%= c.id %>/editar">editar</a></td>
+  </tr>
+<% }) %>
+</tbody>
+</table>
+</div>
+<%- include('../../partials/footer') %>

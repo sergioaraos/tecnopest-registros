@@ -1,0 +1,21 @@
+<%# SERGIO 2026-09-17: listado de direcciones de un cliente. %>
+<%- include('../../partials/header', { titulo: 'Direcciones de ' + cliente.razon_social }) %>
+<h1>Direcciones de <%= cliente.razon_social %></h1>
+<p><a class="boton" href="/admin/clientes/<%= cliente.id %>/direcciones/nueva">+ Nueva direccion</a></p>
+<p><a href="/admin/clientes">&larr; Volver a clientes</a></p>
+<div class="tabla-wrap">
+<table>
+<thead><tr><th>Nombre</th><th>Direccion</th><th>Comuna</th><th></th></tr></thead>
+<tbody>
+<% direcciones.forEach(function(d) { %>
+  <tr>
+    <td><%= d.nombre || '' %></td>
+    <td><%= d.direccion_linea_1 %><% if (d.direccion_linea_2) { %>, <%= d.direccion_linea_2 %><% } %></td>
+    <td><%= d.comuna || '' %></td>
+    <td class="acciones"><a href="/admin/clientes/<%= cliente.id %>/direcciones/<%= d.id %>/editar">editar</a></td>
+  </tr>
+<% }) %>
+</tbody>
+</table>
+</div>
+<%- include('../../partials/footer') %>
