@@ -1,6 +1,7 @@
 <%# SERGIO 2026-09-17: listado de clientes con acceso a editar y a sus direcciones. %>
 <%- include('../../partials/header', { titulo: 'Clientes' }) %>
 <h1>Clientes</h1>
+<% if (typeof error !== 'undefined' && error) { %><div class="error"><%= error %></div><% } %>
 <p><a class="boton" href="/admin/clientes/nuevo">+ Nuevo cliente</a></p>
 <div class="tabla-wrap">
 <table>
@@ -11,7 +12,16 @@
     <td><%= c.razon_social %></td>
     <td><%= c.rut %></td>
     <td><a href="/admin/clientes/<%= c.id %>/direcciones">ver direcciones</a></td>
-    <td class="acciones"><a href="/admin/clientes/<%= c.id %>/editar">editar</a></td>
+    <td class="acciones">
+      <a href="/admin/clientes/<%= c.id %>/editar">editar</a>
+      <%# SERGIO 2026-09-17: eliminar solo esta permitido si el cliente no tiene registros de
+      visita ni certificados asociados; la validacion real se hace en el servidor, esto es
+      solo la confirmacion antes de enviar el formulario. %>
+      <form method="POST" action="/admin/clientes/<%= c.id %>/eliminar" style="display:inline"
+        onsubmit="return confirm('Eliminar el cliente ' + <%- JSON.stringify(c.razon_social) %> + '? Esta accion no se puede deshacer.');">
+        <button type="submit" class="peligro" style="padding:2px 8px;font-size:13px;">eliminar</button>
+      </form>
+    </td>
   </tr>
 <% }) %>
 </tbody>
