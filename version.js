@@ -1,6 +1,8 @@
 // SERGIO 2026-09-17: informacion de version mostrada en el pie de las paginas y en la ruta "/",
 // para poder confirmar rapido si un despliegue nuevo (por ejemplo en Cloudways) quedo activo.
 // Lee el commit actual directamente de la carpeta .git, sin depender de tener git instalado.
+// SERGIO 2026-09-17: cambio sin efecto funcional, solo para forzar un redeploy en Cloudways y
+// probar si la base de datos y los archivos de uploads/firmas sobreviven al despliegue.
 const fs = require('fs');
 const path = require('path');
 
