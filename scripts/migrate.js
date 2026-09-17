@@ -15,5 +15,16 @@ const schema = fs.readFileSync(schemaPath, 'utf8');
 
 db.exec(schema);
 
+// SERGIO 2026-09-16: ajuste para bases de datos creadas antes de agregar direccion_id a
+// certificados (un certificado corresponde siempre a una sola direccion del cliente).
+// CREATE TABLE IF NOT EXISTS no altera tablas ya existentes, asi que lo agregamos a mano
+// si hace falta, para no perder los datos ya cargados.
+const columnas = db.prepare("PRAGMA table_info(certificados)").all();
+const tieneDireccionId = columnas.some((c) => c.name === 'direccion_id');
+if (!tieneDireccionId) {
+  db.exec('ALTER TABLE certificados ADD COLUMN direccion_id INTEGER REFERENCES direcciones(id)');
+  console.log('Columna direccion_id agregada a certificados');
+}
+
 console.log('Migracion aplicada correctamente en ' + dbPath);
 db.close();

@@ -9,6 +9,7 @@ const db = new Database(path.join(__dirname, 'data', 'tecnopest.db'));
 
 const SqliteStore = require('better-sqlite3-session-store')(session);
 const authRoutes = require('./routes/auth')(db);
+const certificadosRoutes = require('./routes/certificados')(db);
 const { requireAuth } = require('./middleware/auth');
 
 const app = express();
@@ -35,6 +36,7 @@ app.use(session({
 }));
 
 app.use('/auth', authRoutes);
+app.use('/certificados', certificadosRoutes);
 
 app.get('/', (req, res) => {
   res.send('Hola desde Node.js en Cloudways. PoC funcionando, ' + new Date().toISOString());
