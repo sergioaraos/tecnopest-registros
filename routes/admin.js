@@ -14,9 +14,11 @@ module.exports = function (db) {
   });
 
   // --- Clientes ---
+  // SERGIO 2026-09-17: el mensaje de error de /clientes/:id/eliminar llega por query string
+  // porque el redirect despues de un POST no puede pasar datos de otra forma sin sesion flash.
   router.get('/clientes', (req, res) => {
     const clientes = db.prepare('SELECT * FROM clientes ORDER BY razon_social').all();
-    res.render('admin/clientes/list', { clientes });
+    res.render('admin/clientes/list', { clientes, error: req.query.error || null });
   });
 
   router.get('/clientes/nuevo', (req, res) => {
@@ -37,6 +39,27 @@ module.exports = function (db) {
     } catch (err) {
       res.render('admin/clientes/form', { cliente: req.body, error: 'No se pudo guardar: ' + err.message });
     }
+  });
+
+  // SERGIO 2026-09-17: un cliente solo se puede eliminar si no tiene registros de visita ni
+  // certificados asociados. Si tiene direcciones pero ningun registro/certificado, las
+  // direcciones se eliminan junto con el cliente.
+  router.post('/clientes/:id/eliminar', (req, res) => {
+    const id = req.params.id;
+    const tieneRegistros = db.prepare('SELECT COUNT(*) AS total FROM registros_visita WHERE cliente_id = ?').get(id).total > 0;
+    const tieneCertificados = db.prepare('SELECT COUNT(*) AS total FROM certificados WHERE cliente_id = ?').get(id).total > 0;
+
+    if (tieneRegistros || tieneCertificados) {
+      return res.redirect('/admin/clientes?error=' + encodeURIComponent('No se puede eliminar: el cliente tiene registros de visita o certificados asociados'));
+    }
+
+    const eliminarClienteConDirecciones = db.transaction((clienteId) => {
+      db.prepare('DELETE FROM direcciones WHERE cliente_id = ?').run(clienteId);
+      db.prepare('DELETE FROM clientes WHERE id = ?').run(clienteId);
+    });
+    eliminarClienteConDirecciones(id);
+
+    res.redirect('/admin/clientes');
   });
 
   router.get('/clientes/:id/editar', (req, res) => {
