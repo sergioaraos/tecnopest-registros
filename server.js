@@ -11,29 +11,27 @@ const { COMMIT, INICIO_SERVIDOR } = require('./version');
 // (por ejemplo en Cloudways), sin depender de correr "npm run migrate" a mano.
 const db = abrirBaseDeDatos();
 
-// SERGIO 2026-09-17: si la base de datos no tiene ningun administrador, se crea uno a partir de
-// las variables de entorno ADMIN_EMAIL / ADMIN_PASSWORD (si estan definidas). Esto permite crear
-// el primer usuario en un despliegue como Cloudways, donde no hay acceso SSH para ejecutar
-// scripts/create-user.js a mano.
-function crearAdminInicialSiFalta() {
-  const hayAdmin = db.prepare("SELECT COUNT(*) AS total FROM usuarios WHERE rol = 'administrador'").get().total > 0;
-  if (hayAdmin) return;
-
+// SERGIO 2026-09-17: si ADMIN_EMAIL / ADMIN_PASSWORD estan definidas, se crea o actualiza ese
+// usuario administrador cada vez que arranca el servidor (no solo la primera vez). Asi, cambiar
+// el valor de la variable en Cloudways y hacer un redeploy sirve tambien para resetear la
+// contrasena, ya que no hay acceso SSH para ejecutar scripts/create-user.js a mano.
+function crearOActualizarAdminDesdeVariables() {
   const email = process.env.ADMIN_EMAIL;
   const password = process.env.ADMIN_PASSWORD;
   if (!email || !password) {
-    console.warn('No hay usuario administrador y no estan definidas ADMIN_EMAIL / ADMIN_PASSWORD. No se creo ningun usuario.');
     return;
   }
 
   const hash = bcrypt.hashSync(password, 10);
   db.prepare(
-    "INSERT INTO usuarios (nombre, email, password_hash, rol) VALUES (?, ?, ?, 'administrador')"
-  ).run('Administrador', email, hash);
-  console.log('Usuario administrador inicial creado: ' + email);
+    `INSERT INTO usuarios (nombre, email, password_hash, rol, activo)
+     VALUES ('Administrador', ?, ?, 'administrador', 1)
+     ON CONFLICT(email) DO UPDATE SET password_hash = excluded.password_hash, rol = 'administrador', activo = 1`
+  ).run(email, hash);
+  console.log('Usuario administrador sincronizado desde variables de entorno: ' + email);
 }
 
-crearAdminInicialSiFalta();
+crearOActualizarAdminDesdeVariables();
 
 const SqliteStore = require('better-sqlite3-session-store')(session);
 const authRoutes = require('./routes/auth')(db);
