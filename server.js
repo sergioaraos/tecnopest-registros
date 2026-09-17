@@ -10,6 +10,30 @@ const { abrirBaseDeDatos } = require('./db');
 // (por ejemplo en Cloudways), sin depender de correr "npm run migrate" a mano.
 const db = abrirBaseDeDatos();
 
+// SERGIO 2026-09-17: si la base de datos no tiene ningun administrador, se crea uno a partir de
+// las variables de entorno ADMIN_EMAIL / ADMIN_PASSWORD (si estan definidas). Esto permite crear
+// el primer usuario en un despliegue como Cloudways, donde no hay acceso SSH para ejecutar
+// scripts/create-user.js a mano.
+function crearAdminInicialSiFalta() {
+  const hayAdmin = db.prepare("SELECT COUNT(*) AS total FROM usuarios WHERE rol = 'administrador'").get().total > 0;
+  if (hayAdmin) return;
+
+  const email = process.env.ADMIN_EMAIL;
+  const password = process.env.ADMIN_PASSWORD;
+  if (!email || !password) {
+    console.warn('No hay usuario administrador y no estan definidas ADMIN_EMAIL / ADMIN_PASSWORD. No se creo ningun usuario.');
+    return;
+  }
+
+  const hash = bcrypt.hashSync(password, 10);
+  db.prepare(
+    "INSERT INTO usuarios (nombre, email, password_hash, rol) VALUES (?, ?, ?, 'administrador')"
+  ).run('Administrador', email, hash);
+  console.log('Usuario administrador inicial creado: ' + email);
+}
+
+crearAdminInicialSiFalta();
+
 const SqliteStore = require('better-sqlite3-session-store')(session);
 const authRoutes = require('./routes/auth')(db);
 const certificadosRoutes = require('./routes/certificados')(db);
