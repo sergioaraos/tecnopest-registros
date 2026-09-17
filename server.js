@@ -12,6 +12,7 @@ const SqliteStore = require('better-sqlite3-session-store')(session);
 const authRoutes = require('./routes/auth')(db);
 const certificadosRoutes = require('./routes/certificados')(db);
 const adminRoutes = require('./routes/admin')(db);
+const tecnicoRoutes = require('./routes/tecnico')(db);
 const { requireAuth } = require('./middleware/auth');
 
 const app = express();
@@ -23,6 +24,10 @@ app.set('views', path.join(__dirname, 'views'));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// SERGIO 2026-09-17: archivos estaticos del formulario del tecnico (service worker, scripts de
+// IndexedDB y firma), servidos directamente sin pasar por el motor de plantillas.
+app.use(express.static(path.join(__dirname, 'public')));
 
 // SERGIO 2026-09-16: sesion guardada en SQLite para que sobreviva un reinicio del servidor,
 // con duracion larga (30 dias) ya que los tecnicos la usan desde el telefono en terreno.
@@ -45,12 +50,19 @@ app.use(session({
 app.use('/auth', authRoutes);
 app.use('/certificados', certificadosRoutes);
 app.use('/admin', adminRoutes);
+app.use('/tecnico', tecnicoRoutes);
 
 // SERGIO 2026-09-17: rutas de login/logout para navegador (formulario HTML), separadas de la
 // API JSON en /auth, para poder usar las pantallas de administracion.
+// SERGIO 2026-09-17: el destino tras iniciar sesion depende del rol: el administrador va al
+// panel de catalogos, el tecnico va a su propio historial de registros.
+function destinoSegunRol(rol) {
+  return rol === 'administrador' ? '/admin' : '/tecnico';
+}
+
 app.get('/login', (req, res) => {
   if (req.session && req.session.usuarioId) {
-    return res.redirect('/admin');
+    return res.redirect(destinoSegunRol(req.session.rol));
   }
   res.render('login', { error: null });
 });
@@ -72,7 +84,7 @@ app.post('/login', (req, res) => {
   req.session.nombre = usuario.nombre;
   req.session.rol = usuario.rol;
 
-  res.redirect('/admin');
+  res.redirect(destinoSegunRol(usuario.rol));
 });
 
 app.post('/logout', (req, res) => {

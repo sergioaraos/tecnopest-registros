@@ -1,0 +1,32 @@
+<%# SERGIO 2026-09-17: historial del tecnico, combina registros sincronizados (servidor) y pendientes (guardados localmente en el telefono). %>
+<%- include('../partials/header-tecnico') %>
+
+<h1>Mis registros</h1>
+<div id="mensaje"></div>
+
+<div class="botones">
+  <a class="boton" href="/tecnico/nuevo">+ Nuevo registro</a>
+  <button type="button" id="btn-sincronizar">Sincronizar</button>
+</div>
+
+<div class="tabla-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Fecha</th>
+        <th>Cliente</th>
+        <th>Direccion</th>
+        <th>Estado</th>
+      </tr>
+    </thead>
+    <tbody id="cuerpo-tabla-registros">
+      <tr><td colspan="4">Cargando...</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<script src="/js/tecnico-db.js"></script>
+<script src="/js/tecnico-comun.js"></script>
+<script src="/js/tecnico-historial.js"></script>
+
+<%- include('../partials/footer') %>

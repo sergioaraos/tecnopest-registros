@@ -70,6 +70,10 @@ CREATE TABLE IF NOT EXISTS certificados (
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+-- SERGIO 2026-09-17: hora_apertura_formulario / hora_guardado_formulario son marcas
+-- automaticas tomadas del reloj del telefono (al abrir el formulario y al guardar), solo
+-- para control interno. horario_ingreso / horario_salida son los que el tecnico ingresa a
+-- mano y los que se muestran en el certificado.
 CREATE TABLE IF NOT EXISTS registros_visita (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   cliente_id INTEGER NOT NULL REFERENCES clientes(id),
@@ -77,6 +81,8 @@ CREATE TABLE IF NOT EXISTS registros_visita (
   tecnico_id INTEGER NOT NULL REFERENCES usuarios(id),
   horario_ingreso TEXT NOT NULL,
   horario_salida TEXT NOT NULL,
+  hora_apertura_formulario TEXT NOT NULL,
+  hora_guardado_formulario TEXT NOT NULL,
   observaciones TEXT,
   firma_tecnico_path TEXT,
   firma_cliente_path TEXT,

@@ -1,0 +1,86 @@
+<%- include('../partials/header-tecnico') %>
+
+<h1>Nuevo registro de visita</h1>
+<div id="mensaje"></div>
+
+<div class="tarjeta">
+  <h2>Cliente y direccion</h2>
+  <label for="buscador-cliente">Cliente</label>
+  <input type="text" id="buscador-cliente" placeholder="Escribe para buscar un cliente" autocomplete="off">
+  <div id="resultados-cliente"></div>
+  <input type="hidden" id="cliente-id">
+
+  <div id="bloque-direccion" style="display:none">
+    <label for="direccion-id">Direccion</label>
+    <select id="direccion-id"></select>
+  </div>
+</div>
+
+<div class="tarjeta">
+  <h2>Operadores</h2>
+  <div id="lista-operadores" class="checklist"></div>
+</div>
+
+<div class="tarjeta">
+  <h2>Productos aplicados</h2>
+  <div id="lista-productos"></div>
+  <div class="botones">
+    <button type="button" class="secundario" id="btn-agregar-producto">+ Agregar producto</button>
+  </div>
+</div>
+
+<div class="tarjeta">
+  <h2>Horario</h2>
+  <label for="horario-ingreso">Horario de ingreso</label>
+  <input type="datetime-local" id="horario-ingreso">
+  <label for="horario-salida">Horario de salida</label>
+  <input type="datetime-local" id="horario-salida">
+</div>
+
+<div class="tarjeta">
+  <h2>Observaciones</h2>
+  <textarea id="observaciones" rows="4" placeholder="Observaciones de la visita (opcional)"></textarea>
+</div>
+
+<div class="tarjeta">
+  <h2>Firma del tecnico</h2>
+  <canvas class="firma" id="firma-tecnico"></canvas>
+  <div class="botones">
+    <button type="button" class="secundario" id="btn-limpiar-firma-tecnico">Limpiar firma</button>
+  </div>
+</div>
+
+<div class="tarjeta">
+  <h2>Firma del cliente</h2>
+  <canvas class="firma" id="firma-cliente"></canvas>
+  <div class="botones">
+    <button type="button" class="secundario" id="btn-limpiar-firma-cliente">Limpiar firma</button>
+  </div>
+</div>
+
+<div class="botones">
+  <button type="button" id="btn-guardar">Guardar registro</button>
+  <a class="boton secundario" href="/tecnico">Cancelar</a>
+</div>
+
+<!-- SERGIO 2026-09-17: plantilla oculta para cada linea de producto, se clona con JS -->
+<template id="plantilla-linea-producto">
+  <div class="linea-producto">
+    <label>Producto</label>
+    <select class="select-producto"></select>
+    <label>Cantidad real usada</label>
+    <input type="text" class="input-cantidad" placeholder="ej. 100g, 80cc/10L">
+    <label>Zona de aplicacion</label>
+    <input type="text" class="input-zona" placeholder="ej. Interior, Exterior">
+    <div class="botones">
+      <button type="button" class="secundario btn-quitar-producto">Quitar producto</button>
+    </div>
+  </div>
+</template>
+
+<script src="/js/tecnico-db.js"></script>
+<script src="/js/tecnico-firma.js"></script>
+<script src="/js/tecnico-comun.js"></script>
+<script src="/js/tecnico-nuevo.js"></script>
+
+<%- include('../partials/footer') %>
