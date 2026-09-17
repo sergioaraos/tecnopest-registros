@@ -4,6 +4,7 @@ const path = require('path');
 const PDFDocument = require('pdfkit');
 const bcrypt = require('bcryptjs');
 const { abrirBaseDeDatos } = require('./db');
+const { COMMIT, INICIO_SERVIDOR } = require('./version');
 
 // SERGIO 2026-09-17: la base de datos se abre con db.js, que crea la carpeta data/ y aplica el
 // esquema si hace falta. Esto permite que el servidor arranque solo en un despliegue nuevo
@@ -50,6 +51,14 @@ app.set('views', path.join(__dirname, 'views'));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// SERGIO 2026-09-17: version (commit) disponible en todas las vistas, para confirmar rapido si
+// un despliegue nuevo quedo activo.
+app.use((req, res, next) => {
+  res.locals.version = COMMIT;
+  res.locals.inicioServidor = INICIO_SERVIDOR;
+  next();
+});
 
 // SERGIO 2026-09-17: archivos estaticos del formulario del tecnico (service worker, scripts de
 // IndexedDB y firma), servidos directamente sin pasar por el motor de plantillas.
@@ -120,7 +129,7 @@ app.post('/logout', (req, res) => {
 });
 
 app.get('/', (req, res) => {
-  res.send('Hola desde Node.js en Cloudways. PoC funcionando, ' + new Date().toISOString());
+  res.send('TecnoPest Registros funcionando. Version ' + COMMIT + ', servidor iniciado ' + INICIO_SERVIDOR);
 });
 
 // SERGIO 2026-09-16: ruta de prueba para verificar que la sesion y el login funcionan,
