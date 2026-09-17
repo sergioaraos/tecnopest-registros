@@ -1,0 +1,47 @@
+<!-- SERGIO 2026-09-17: layout compartido de las pantallas de administracion, HTML simple sin frameworks de frontend -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title><%= titulo %> - TecnoPest Registros</title>
+<style>
+  body { font-family: system-ui, sans-serif; margin: 0; background: #f5f5f5; color: #222; }
+  nav { background: #1b5e20; padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  nav a { color: #fff; text-decoration: none; font-size: 14px; }
+  nav a:hover { text-decoration: underline; }
+  nav .marca { font-weight: bold; margin-right: 16px; }
+  main { max-width: 900px; margin: 0 auto; padding: 16px; }
+  h1 { font-size: 20px; }
+  table { width: 100%; border-collapse: collapse; background: #fff; }
+  th, td { padding: 8px; border-bottom: 1px solid #ddd; text-align: left; font-size: 14px; }
+  .tabla-wrap { overflow-x: auto; }
+  form.formulario { background: #fff; padding: 16px; max-width: 500px; }
+  form.formulario label { display: block; margin-top: 10px; font-size: 14px; font-weight: bold; }
+  form.formulario input, form.formulario select, form.formulario textarea {
+    width: 100%; padding: 8px; margin-top: 4px; box-sizing: border-box; font-size: 14px;
+  }
+  .botones { margin-top: 16px; display: flex; gap: 8px; }
+  button, .boton {
+    background: #1b5e20; color: #fff; border: none; padding: 8px 14px; border-radius: 4px;
+    cursor: pointer; text-decoration: none; font-size: 14px; display: inline-block;
+  }
+  button.secundario, .boton.secundario { background: #757575; }
+  .error { background: #ffebee; color: #b71c1c; padding: 8px 12px; margin-bottom: 12px; border-radius: 4px; font-size: 14px; }
+  .inactivo { color: #999; font-style: italic; }
+  .acciones a { margin-right: 10px; font-size: 13px; }
+</style>
+</head>
+<body>
+<nav>
+  <span class="marca">TecnoPest Admin</span>
+  <a href="/admin">Inicio</a>
+  <a href="/admin/clientes">Clientes</a>
+  <a href="/admin/productos">Productos</a>
+  <a href="/admin/tipos-servicio">Tipos de servicio</a>
+  <a href="/admin/operadores">Operadores</a>
+  <form method="POST" action="/logout" style="margin-left:auto;display:inline">
+    <button type="submit" style="background:none;border:none;color:#fff;text-decoration:underline;cursor:pointer;font-size:14px;padding:0;">Cerrar sesion</button>
+  </form>
+</nav>
+<main>

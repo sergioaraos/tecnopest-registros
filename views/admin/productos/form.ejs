@@ -1,0 +1,31 @@
+<%# SERGIO 2026-09-17: formulario para crear/editar un producto. %>
+<%- include('../../partials/header', { titulo: producto.id ? 'Editar producto' : 'Nuevo producto' }) %>
+<h1><%= producto.id ? 'Editar producto' : 'Nuevo producto' %></h1>
+<% if (error) { %><div class="error"><%= error %></div><% } %>
+<form class="formulario" method="POST" action="<%= producto.id ? '/admin/productos/' + producto.id : '/admin/productos' %>">
+  <label>Nombre *</label>
+  <input type="text" name="nombre" value="<%= producto.nombre || '' %>" required>
+
+  <label>Tipo de servicio *</label>
+  <select name="tipo_servicio_id" required>
+    <option value="">Selecciona...</option>
+    <% tiposServicio.forEach(function(t) { %>
+      <option value="<%= t.id %>" <%= String(producto.tipo_servicio_id) === String(t.id) ? 'selected' : '' %>><%= t.nombre %></option>
+    <% }) %>
+  </select>
+
+  <label>Componente principal</label>
+  <input type="text" name="componente_principal" value="<%= producto.componente_principal || '' %>">
+
+  <label>Registro ISP</label>
+  <input type="text" name="registro_isp" value="<%= producto.registro_isp || '' %>">
+
+  <label>Disolucion estandar</label>
+  <input type="text" name="disolucion_estandar" value="<%= producto.disolucion_estandar || '' %>">
+
+  <div class="botones">
+    <button type="submit">Guardar</button>
+    <a class="boton secundario" href="/admin/productos">Cancelar</a>
+  </div>
+</form>
+<%- include('../../partials/footer') %>

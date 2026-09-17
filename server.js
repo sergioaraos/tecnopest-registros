@@ -3,6 +3,7 @@ const session = require('express-session');
 const Database = require('better-sqlite3');
 const path = require('path');
 const PDFDocument = require('pdfkit');
+const bcrypt = require('bcryptjs');
 
 // SERGIO 2026-09-16: conexion a la base de datos SQLite, usada por la sesion y las rutas de login
 const db = new Database(path.join(__dirname, 'data', 'tecnopest.db'));
@@ -10,12 +11,18 @@ const db = new Database(path.join(__dirname, 'data', 'tecnopest.db'));
 const SqliteStore = require('better-sqlite3-session-store')(session);
 const authRoutes = require('./routes/auth')(db);
 const certificadosRoutes = require('./routes/certificados')(db);
+const adminRoutes = require('./routes/admin')(db);
 const { requireAuth } = require('./middleware/auth');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// SERGIO 2026-09-17: motor de plantillas para las pantallas de administracion (HTML simple, sin frameworks de frontend)
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // SERGIO 2026-09-16: sesion guardada en SQLite para que sobreviva un reinicio del servidor,
 // con duracion larga (30 dias) ya que los tecnicos la usan desde el telefono en terreno.
@@ -37,6 +44,42 @@ app.use(session({
 
 app.use('/auth', authRoutes);
 app.use('/certificados', certificadosRoutes);
+app.use('/admin', adminRoutes);
+
+// SERGIO 2026-09-17: rutas de login/logout para navegador (formulario HTML), separadas de la
+// API JSON en /auth, para poder usar las pantallas de administracion.
+app.get('/login', (req, res) => {
+  if (req.session && req.session.usuarioId) {
+    return res.redirect('/admin');
+  }
+  res.render('login', { error: null });
+});
+
+app.post('/login', (req, res) => {
+  const { email, password } = req.body || {};
+
+  if (!email || !password) {
+    return res.render('login', { error: 'Email y contrasena son obligatorios' });
+  }
+
+  const usuario = db.prepare('SELECT * FROM usuarios WHERE email = ? AND activo = 1').get(email);
+
+  if (!usuario || !bcrypt.compareSync(password, usuario.password_hash)) {
+    return res.render('login', { error: 'Email o contrasena incorrectos' });
+  }
+
+  req.session.usuarioId = usuario.id;
+  req.session.nombre = usuario.nombre;
+  req.session.rol = usuario.rol;
+
+  res.redirect('/admin');
+});
+
+app.post('/logout', (req, res) => {
+  req.session.destroy(() => {
+    res.redirect('/login');
+  });
+});
 
 app.get('/', (req, res) => {
   res.send('Hola desde Node.js en Cloudways. PoC funcionando, ' + new Date().toISOString());

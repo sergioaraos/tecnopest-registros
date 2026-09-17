@@ -1,0 +1,26 @@
+<%# SERGIO 2026-09-17: listado de operadores con activar/desactivar. %>
+<%- include('../../partials/header', { titulo: 'Operadores' }) %>
+<h1>Operadores</h1>
+<p><a class="boton" href="/admin/operadores/nuevo">+ Nuevo operador</a></p>
+<div class="tabla-wrap">
+<table>
+<thead><tr><th>Nombre</th><th>Estado</th><th></th></tr></thead>
+<tbody>
+<% operadores.forEach(function(o) { %>
+  <tr class="<%= o.activo ? '' : 'inactivo' %>">
+    <td><%= o.nombre %></td>
+    <td><%= o.activo ? 'Activo' : 'Inactivo' %></td>
+    <td class="acciones">
+      <a href="/admin/operadores/<%= o.id %>/editar">editar</a>
+      <form style="display:inline" method="POST" action="/admin/operadores/<%= o.id %>/toggle-activo">
+        <button type="submit" class="secundario" style="padding:2px 8px;font-size:12px;">
+          <%= o.activo ? 'desactivar' : 'activar' %>
+        </button>
+      </form>
+    </td>
+  </tr>
+<% }) %>
+</tbody>
+</table>
+</div>
+<%- include('../../partials/footer') %>

@@ -1,0 +1,20 @@
+<%# SERGIO 2026-09-17: listado y alta rapida de tipos de servicio. %>
+<%- include('../../partials/header', { titulo: 'Tipos de servicio' }) %>
+<h1>Tipos de servicio</h1>
+<% if (error) { %><div class="error"><%= error %></div><% } %>
+<form class="formulario" method="POST" action="/admin/tipos-servicio">
+  <label>Nuevo tipo de servicio *</label>
+  <input type="text" name="nombre" required placeholder="Ej: Desratizacion">
+  <div class="botones"><button type="submit">Agregar</button></div>
+</form>
+<div class="tabla-wrap">
+<table>
+<thead><tr><th>Nombre</th></tr></thead>
+<tbody>
+<% tiposServicio.forEach(function(t) { %>
+  <tr><td><%= t.nombre %></td></tr>
+<% }) %>
+</tbody>
+</table>
+</div>
+<%- include('../../partials/footer') %>
