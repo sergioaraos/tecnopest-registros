@@ -28,7 +28,10 @@
   </form>
 </div>
 <footer style="text-align:center;font-size:11px;color:#999;padding:12px;">
-  Version <%= typeof version !== 'undefined' ? version : 'desconocida' %>
+  <%# SERGIO 2026-09-17: se agrega la hora de inicio del servidor ademas del commit, porque
+  en Cloudways no hay carpeta .git y el commit siempre sale "desconocido"; la hora si cambia
+  en cada despliegue y sirve para confirmar que un redeploy quedo activo. %>
+  Version <%= typeof version !== 'undefined' ? version : 'desconocida' %> (servidor iniciado <%= typeof inicioServidor !== 'undefined' ? inicioServidor : 'desconocido' %>)
 </footer>
 </body>
 </html>
