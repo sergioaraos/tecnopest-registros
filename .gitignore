@@ -1,6 +1,6 @@
 node_modules/
 data/
 cookies.txt
-CLAUDE.md
+*.md
 uploads/
 Claude outputs/
