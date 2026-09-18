@@ -1,0 +1,33 @@
+<%# SERGIO 2026-09-18: listado de usuarios tecnicos y administrativos. La cuenta de %>
+<%# administrador no se administra aqui, se maneja por variable de entorno en Cloudways. %>
+<%- include('../../partials/header', { titulo: 'Usuarios' }) %>
+<h1>Usuarios</h1>
+<% if (typeof error !== 'undefined' && error) { %><div class="error"><%= error %></div><% } %>
+<p><a class="boton" href="/admin/usuarios/nuevo">+ Nuevo usuario</a></p>
+<div class="tabla-wrap">
+<table>
+<thead><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Estado</th><th></th></tr></thead>
+<tbody>
+<% usuarios.forEach(function(u) { %>
+  <tr class="<%= u.activo ? '' : 'inactivo' %>">
+    <td><%= u.nombre %></td>
+    <td><%= u.email %></td>
+    <td><%= u.rol === 'administrativo' ? 'Administrativo' : 'Tecnico' %></td>
+    <td><%= u.activo ? 'Activo' : 'Inactivo' %></td>
+    <td class="acciones">
+      <a href="/admin/usuarios/<%= u.id %>/editar">editar</a>
+      <form style="display:inline" method="POST" action="/admin/usuarios/<%= u.id %>/toggle-activo">
+        <button type="submit" class="secundario" style="padding:2px 8px;font-size:12px;">
+          <%= u.activo ? 'desactivar' : 'activar' %>
+        </button>
+      </form>
+    </td>
+  </tr>
+<% }) %>
+<% if (usuarios.length === 0) { %>
+  <tr><td colspan="5">No hay tecnicos ni administrativos creados todavia.</td></tr>
+<% } %>
+</tbody>
+</table>
+</div>
+<%- include('../../partials/footer') %>

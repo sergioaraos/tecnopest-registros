@@ -17,7 +17,11 @@ function requireAuth(req, res, next) {
   next();
 }
 
-function requireRole(rol) {
+// SERGIO 2026-09-18: requireRole ahora acepta un rol unico ("administrador") o una lista
+// de roles permitidos (["administrador", "administrativo"]), para pantallas compartidas
+// entre mas de un rol.
+function requireRole(roles) {
+  const rolesPermitidos = Array.isArray(roles) ? roles : [roles];
   return function (req, res, next) {
     if (!req.session || !req.session.usuarioId) {
       if (esNavegacionHtml(req)) {
@@ -25,7 +29,7 @@ function requireRole(rol) {
       }
       return res.status(401).json({ error: 'No autenticado' });
     }
-    if (req.session.rol !== rol) {
+    if (!rolesPermitidos.includes(req.session.rol)) {
       if (esNavegacionHtml(req)) {
         return res.status(403).send('No autorizado para esta accion');
       }

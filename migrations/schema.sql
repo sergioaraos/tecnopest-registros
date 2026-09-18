@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
   nombre TEXT NOT NULL,
   email TEXT NOT NULL UNIQUE,
   password_hash TEXT NOT NULL,
-  rol TEXT NOT NULL CHECK (rol IN ('tecnico', 'administrador')),
+  rol TEXT NOT NULL CHECK (rol IN ('tecnico', 'administrador', 'administrativo')),
   activo INTEGER NOT NULL DEFAULT 1,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))

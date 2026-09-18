@@ -13,8 +13,10 @@ if (!nombre || !email || !password || !rol) {
   process.exit(1);
 }
 
-if (rol !== 'tecnico' && rol !== 'administrador') {
-  console.error('El rol debe ser "tecnico" o "administrador"');
+// SERGIO 2026-09-18: se agrega "administrativo" como rol valido tambien por linea de
+// comandos (sigue existiendo como respaldo manual, ademas de la pantalla /admin/usuarios).
+if (rol !== 'tecnico' && rol !== 'administrador' && rol !== 'administrativo') {
+  console.error('El rol debe ser "tecnico", "administrador" o "administrativo"');
   process.exit(1);
 }
 
