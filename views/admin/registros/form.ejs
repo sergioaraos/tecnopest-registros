@@ -1,0 +1,112 @@
+<%# SERGIO 2026-09-18: edicion de un registro de visita ya cargado por el tecnico. Solo se %>
+<%# puede llegar aqui si el registro todavia esta en estado pendiente (sin certificado). %>
+<%- include('../../partials/header', { titulo: 'Editar registro' }) %>
+<h1>Editar registro de visita</h1>
+<% if (typeof error !== 'undefined' && error) { %><div class="error"><%= error %></div><% } %>
+<form method="POST" action="/admin/registros/<%= registro.id %>" class="formulario" style="max-width:640px;">
+  <label for="cliente_id">Cliente</label>
+  <select name="cliente_id" id="cliente_id" required>
+    <% clientes.forEach(function(c) { %>
+      <option value="<%= c.id %>" <%= String(registro.cliente_id) === String(c.id) ? 'selected' : '' %>><%= c.razon_social %></option>
+    <% }) %>
+  </select>
+
+  <label for="direccion_id">Direccion</label>
+  <select name="direccion_id" id="direccion_id" required>
+    <% direcciones.forEach(function(d) { %>
+      <option value="<%= d.id %>" <%= String(registro.direccion_id) === String(d.id) ? 'selected' : '' %>><%= d.razon_social %> - <%= d.direccion_linea_1 %><% if (d.comuna) { %>, <%= d.comuna %><% } %></option>
+    <% }) %>
+  </select>
+  <p style="font-size:12px;color:#666;margin-top:2px;">La direccion debe pertenecer al cliente elegido arriba.</p>
+
+  <label for="tecnico_id">Tecnico</label>
+  <select name="tecnico_id" id="tecnico_id" required>
+    <% tecnicos.forEach(function(t) { %>
+      <option value="<%= t.id %>" <%= String(registro.tecnico_id) === String(t.id) ? 'selected' : '' %>><%= t.nombre %></option>
+    <% }) %>
+  </select>
+
+  <label for="horario-ingreso">Horario de ingreso</label>
+  <input type="datetime-local" name="horario_ingreso" id="horario-ingreso" value="<%= registro.horario_ingreso %>" required>
+
+  <label for="horario-salida">Horario de salida</label>
+  <input type="datetime-local" name="horario_salida" id="horario-salida" value="<%= registro.horario_salida %>" required>
+
+  <label for="observaciones">Observaciones</label>
+  <textarea name="observaciones" id="observaciones" rows="4"><%= registro.observaciones || '' %></textarea>
+
+  <label>Operadores</label>
+  <div style="margin-top:4px;">
+    <% operadores.forEach(function(o) { %>
+      <label style="font-weight:normal;display:block;">
+        <input type="checkbox" name="operador_ids" value="<%= o.id %>" <%= operadorIdsSeleccionados.map(String).includes(String(o.id)) ? 'checked' : '' %>>
+        <%= o.nombre %>
+      </label>
+    <% }) %>
+  </div>
+
+  <label>Productos aplicados</label>
+  <div id="lineas-productos">
+    <% productosSeleccionados.forEach(function(p) { %>
+      <div class="linea-producto" style="border:1px solid #e6e6e6;border-radius:6px;padding:10px;margin-top:8px;">
+        <label style="font-weight:normal;">Producto</label>
+        <select name="producto_id">
+          <% productos.forEach(function(prod) { %>
+            <option value="<%= prod.id %>" <%= String(p.producto_id) === String(prod.id) ? 'selected' : '' %>><%= prod.nombre %></option>
+          <% }) %>
+        </select>
+        <label style="font-weight:normal;">Cantidad real usada</label>
+        <input type="text" name="cantidad_real" value="<%= p.cantidad_real || '' %>" placeholder="ej. 100g, 80cc/10L">
+        <label style="font-weight:normal;">Zona de aplicacion</label>
+        <input type="text" name="zona_aplicacion" value="<%= p.zona_aplicacion || '' %>" placeholder="ej. Interior, Exterior">
+        <div class="botones">
+          <button type="button" class="secundario btn-quitar-producto">Quitar producto</button>
+        </div>
+      </div>
+    <% }) %>
+  </div>
+  <div class="botones">
+    <button type="button" class="secundario" id="btn-agregar-producto">+ Agregar producto</button>
+  </div>
+
+  <div class="botones">
+    <button type="submit">Guardar cambios</button>
+    <a class="boton secundario" href="/admin/registros">Cancelar</a>
+  </div>
+</form>
+
+<template id="plantilla-linea-producto">
+  <div class="linea-producto" style="border:1px solid #e6e6e6;border-radius:6px;padding:10px;margin-top:8px;">
+    <label style="font-weight:normal;">Producto</label>
+    <select name="producto_id">
+      <% productos.forEach(function(prod) { %>
+        <option value="<%= prod.id %>"><%= prod.nombre %></option>
+      <% }) %>
+    </select>
+    <label style="font-weight:normal;">Cantidad real usada</label>
+    <input type="text" name="cantidad_real" placeholder="ej. 100g, 80cc/10L">
+    <label style="font-weight:normal;">Zona de aplicacion</label>
+    <input type="text" name="zona_aplicacion" placeholder="ej. Interior, Exterior">
+    <div class="botones">
+      <button type="button" class="secundario btn-quitar-producto">Quitar producto</button>
+    </div>
+  </div>
+</template>
+
+<script>
+  // SERGIO 2026-09-18: agregar/quitar lineas de producto en el formulario de edicion,
+  // clonando la plantilla oculta (igual idea que el formulario del tecnico, pero simple y
+  // sin guardar nada offline, porque el admin siempre esta conectado).
+  document.getElementById('btn-agregar-producto').addEventListener('click', function () {
+    const plantilla = document.getElementById('plantilla-linea-producto');
+    const nodo = plantilla.content.cloneNode(true);
+    document.getElementById('lineas-productos').appendChild(nodo);
+  });
+  document.getElementById('lineas-productos').addEventListener('click', function (ev) {
+    if (ev.target.classList.contains('btn-quitar-producto')) {
+      ev.target.closest('.linea-producto').remove();
+    }
+  });
+</script>
+
+<%- include('../../partials/footer') %>

@@ -1,0 +1,42 @@
+<%# SERGIO 2026-09-18: listado de registros de visita, con filtro por cliente. Los registros %>
+<%# ya asociados a un certificado quedan bloqueados para edicion (estado = 'certificado'). %>
+<%- include('../../partials/header', { titulo: 'Registros de visita' }) %>
+<h1>Registros de visita</h1>
+<% if (typeof error !== 'undefined' && error) { %><div class="error"><%= error %></div><% } %>
+<form method="GET" action="/admin/registros" style="margin-bottom:12px;display:flex;gap:8px;align-items:center;">
+  <label for="cliente_id" style="margin:0;">Cliente</label>
+  <select name="cliente_id" id="cliente_id" onchange="this.form.submit()" style="width:auto;">
+    <option value="">Todos los clientes</option>
+    <% clientes.forEach(function(c) { %>
+      <option value="<%= c.id %>" <%= String(clienteId) === String(c.id) ? 'selected' : '' %>><%= c.razon_social %></option>
+    <% }) %>
+  </select>
+</form>
+<div class="tabla-wrap">
+<table>
+<thead><tr><th>Cliente</th><th>Direccion</th><th>Tecnico</th><th>Ingreso</th><th>Salida</th><th>Estado</th><th></th></tr></thead>
+<tbody>
+<% registros.forEach(function(r) { %>
+  <tr>
+    <td><%= r.cliente %></td>
+    <td><%= r.direccion %><% if (r.comuna) { %>, <%= r.comuna %><% } %></td>
+    <td><%= r.tecnico %></td>
+    <td><%= r.horario_ingreso %></td>
+    <td><%= r.horario_salida %></td>
+    <td><%= r.estado === 'certificado' ? 'certificado' : 'pendiente' %></td>
+    <td class="acciones">
+      <% if (r.estado !== 'certificado') { %>
+        <a href="/admin/registros/<%= r.id %>/editar">editar</a>
+      <% } else { %>
+        <span class="inactivo">bloqueado</span>
+      <% } %>
+    </td>
+  </tr>
+<% }) %>
+<% if (registros.length === 0) { %>
+  <tr><td colspan="7">No hay registros de visita.</td></tr>
+<% } %>
+</tbody>
+</table>
+</div>
+<%- include('../../partials/footer') %>
