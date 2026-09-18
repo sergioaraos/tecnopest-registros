@@ -252,5 +252,126 @@ module.exports = function (db) {
     res.redirect('/admin/operadores');
   });
 
+  // --- Registros de visita ---
+  // SERGIO 2026-09-18: el admin puede ver y editar los registros de visita que cargan los
+  // tecnicos. Un registro que ya quedo asociado a un certificado emitido no se puede editar,
+  // para que el certificado siga siendo consistente con lo que se genero.
+  router.get('/registros', (req, res) => {
+    const clienteId = req.query.cliente_id || '';
+    let sql = `SELECT rv.id, rv.horario_ingreso, rv.horario_salida, rv.estado,
+                      c.razon_social AS cliente, d.direccion_linea_1 AS direccion, d.comuna,
+                      u.nombre AS tecnico
+               FROM registros_visita rv
+               JOIN clientes c ON c.id = rv.cliente_id
+               JOIN direcciones d ON d.id = rv.direccion_id
+               JOIN usuarios u ON u.id = rv.tecnico_id`;
+    const params = [];
+    if (clienteId) {
+      sql += ' WHERE rv.cliente_id = ?';
+      params.push(clienteId);
+    }
+    sql += ' ORDER BY rv.horario_ingreso DESC';
+    const registros = db.prepare(sql).all(...params);
+    const clientes = db.prepare('SELECT id, razon_social FROM clientes ORDER BY razon_social').all();
+    res.render('admin/registros/list', { registros, clientes, clienteId, error: req.query.error || null });
+  });
+
+  function cargarCatalogosRegistro(db) {
+    const clientes = db.prepare('SELECT id, razon_social FROM clientes ORDER BY razon_social').all();
+    const direcciones = db.prepare(
+      `SELECT d.id, d.cliente_id, d.direccion_linea_1, d.comuna, c.razon_social
+       FROM direcciones d JOIN clientes c ON c.id = d.cliente_id ORDER BY c.razon_social, d.direccion_linea_1`
+    ).all();
+    const tecnicos = db.prepare("SELECT id, nombre FROM usuarios WHERE rol = 'tecnico' ORDER BY nombre").all();
+    const operadores = db.prepare('SELECT id, nombre FROM operadores WHERE activo = 1 ORDER BY nombre').all();
+    const productos = db.prepare('SELECT id, nombre FROM productos WHERE activo = 1 ORDER BY nombre').all();
+    return { clientes, direcciones, tecnicos, operadores, productos };
+  }
+
+  router.get('/registros/:id/editar', (req, res) => {
+    const registro = db.prepare('SELECT * FROM registros_visita WHERE id = ?').get(req.params.id);
+    if (!registro) return res.status(404).send('Registro no encontrado');
+    if (registro.estado === 'certificado') {
+      return res.redirect('/admin/registros?error=' + encodeURIComponent('Este registro ya tiene un certificado emitido y no se puede editar'));
+    }
+
+    const catalogos = cargarCatalogosRegistro(db);
+    const operadorIdsSeleccionados = db.prepare('SELECT operador_id FROM registro_operadores WHERE registro_id = ?')
+      .all(req.params.id).map((r) => r.operador_id);
+    const productosSeleccionados = db.prepare('SELECT producto_id, cantidad_real, zona_aplicacion FROM registro_productos WHERE registro_id = ?')
+      .all(req.params.id);
+
+    res.render('admin/registros/form', Object.assign({
+      registro, operadorIdsSeleccionados, productosSeleccionados, error: null
+    }, catalogos));
+  });
+
+  router.post('/registros/:id', (req, res) => {
+    const registro = db.prepare('SELECT * FROM registros_visita WHERE id = ?').get(req.params.id);
+    if (!registro) return res.status(404).send('Registro no encontrado');
+    if (registro.estado === 'certificado') {
+      return res.redirect('/admin/registros?error=' + encodeURIComponent('Este registro ya tiene un certificado emitido y no se puede editar'));
+    }
+
+    const { cliente_id, direccion_id, tecnico_id, horario_ingreso, horario_salida, observaciones } = req.body;
+    const operadorIds = [].concat(req.body.operador_ids || []).filter(Boolean);
+    const productoIds = [].concat(req.body.producto_id || []).filter(Boolean);
+    const cantidadesReales = [].concat(req.body.cantidad_real || []);
+    const zonasAplicacion = [].concat(req.body.zona_aplicacion || []);
+
+    function volverConError(mensaje) {
+      const catalogos = cargarCatalogosRegistro(db);
+      return res.render('admin/registros/form', Object.assign({
+        registro: Object.assign({ id: req.params.id }, req.body),
+        operadorIdsSeleccionados: operadorIds,
+        productosSeleccionados: productoIds.map((id, i) => ({
+          producto_id: id, cantidad_real: cantidadesReales[i], zona_aplicacion: zonasAplicacion[i]
+        })),
+        error: mensaje
+      }, catalogos));
+    }
+
+    if (!cliente_id || !direccion_id || !tecnico_id || !horario_ingreso || !horario_salida) {
+      return volverConError('Faltan datos obligatorios');
+    }
+    const direccion = db.prepare('SELECT * FROM direcciones WHERE id = ?').get(direccion_id);
+    if (!direccion || String(direccion.cliente_id) !== String(cliente_id)) {
+      return volverConError('La direccion elegida no pertenece al cliente elegido');
+    }
+    const tecnico = db.prepare("SELECT * FROM usuarios WHERE id = ? AND rol = 'tecnico'").get(tecnico_id);
+    if (!tecnico) {
+      return volverConError('El tecnico elegido no es valido');
+    }
+    if (operadorIds.length === 0) {
+      return volverConError('Debe indicar al menos un operador');
+    }
+    if (productoIds.length === 0) {
+      return volverConError('Debe indicar al menos un producto');
+    }
+
+    const actualizarRegistro = db.transaction(() => {
+      db.prepare(
+        `UPDATE registros_visita SET cliente_id = ?, direccion_id = ?, tecnico_id = ?,
+         horario_ingreso = ?, horario_salida = ?, observaciones = ?, updated_at = datetime('now')
+         WHERE id = ?`
+      ).run(cliente_id, direccion_id, tecnico_id, horario_ingreso, horario_salida, observaciones || null, req.params.id);
+
+      db.prepare('DELETE FROM registro_operadores WHERE registro_id = ?').run(req.params.id);
+      const insertarOperador = db.prepare('INSERT INTO registro_operadores (registro_id, operador_id) VALUES (?, ?)');
+      operadorIds.forEach((operadorId) => insertarOperador.run(req.params.id, operadorId));
+
+      db.prepare('DELETE FROM registro_productos WHERE registro_id = ?').run(req.params.id);
+      const insertarProducto = db.prepare(
+        'INSERT INTO registro_productos (registro_id, producto_id, cantidad_real, zona_aplicacion) VALUES (?, ?, ?, ?)'
+      );
+      productoIds.forEach((productoId, i) => {
+        insertarProducto.run(req.params.id, productoId, cantidadesReales[i] || null, zonasAplicacion[i] || null);
+      });
+    });
+    actualizarRegistro();
+
+    res.redirect('/admin/registros');
+  });
+
   return router;
 };
