@@ -286,16 +286,19 @@ module.exports = function (db) {
     res.render('admin/registros/list', { registros, clientes, clienteId, error: req.query.error || null });
   });
 
+  // SERGIO 2026-09-18: el tecnico asignado (quien cargo el registro con su cuenta de la
+  // app) ya no se puede cambiar desde este formulario, a pedido de Sergio: se presta a
+  // confusion con "Operadores" (los aplicadores en terreno), que es un concepto distinto.
+  // El tecnico_id del registro queda fijo, tal como se guardo originalmente.
   function cargarCatalogosRegistro(db) {
     const clientes = db.prepare('SELECT id, razon_social FROM clientes ORDER BY razon_social').all();
     const direcciones = db.prepare(
       `SELECT d.id, d.cliente_id, d.direccion_linea_1, d.comuna, c.razon_social
        FROM direcciones d JOIN clientes c ON c.id = d.cliente_id ORDER BY c.razon_social, d.direccion_linea_1`
     ).all();
-    const tecnicos = db.prepare("SELECT id, nombre FROM usuarios WHERE rol = 'tecnico' ORDER BY nombre").all();
     const operadores = db.prepare('SELECT id, nombre FROM operadores WHERE activo = 1 ORDER BY nombre').all();
     const productos = db.prepare('SELECT id, nombre FROM productos WHERE activo = 1 ORDER BY nombre').all();
-    return { clientes, direcciones, tecnicos, operadores, productos };
+    return { clientes, direcciones, operadores, productos };
   }
 
   router.get('/registros/:id/editar', (req, res) => {
@@ -323,7 +326,7 @@ module.exports = function (db) {
       return res.redirect('/admin/registros?error=' + encodeURIComponent('Este registro ya tiene un certificado emitido y no se puede editar'));
     }
 
-    const { cliente_id, direccion_id, tecnico_id, horario_ingreso, horario_salida, observaciones } = req.body;
+    const { cliente_id, direccion_id, horario_ingreso, horario_salida, observaciones } = req.body;
     const operadorIds = [].concat(req.body.operador_ids || []).filter(Boolean);
     const productoIds = [].concat(req.body.producto_id || []).filter(Boolean);
     const cantidadesReales = [].concat(req.body.cantidad_real || []);
@@ -341,16 +344,12 @@ module.exports = function (db) {
       }, catalogos));
     }
 
-    if (!cliente_id || !direccion_id || !tecnico_id || !horario_ingreso || !horario_salida) {
+    if (!cliente_id || !direccion_id || !horario_ingreso || !horario_salida) {
       return volverConError('Faltan datos obligatorios');
     }
     const direccion = db.prepare('SELECT * FROM direcciones WHERE id = ?').get(direccion_id);
     if (!direccion || String(direccion.cliente_id) !== String(cliente_id)) {
       return volverConError('La direccion elegida no pertenece al cliente elegido');
-    }
-    const tecnico = db.prepare("SELECT * FROM usuarios WHERE id = ? AND rol = 'tecnico'").get(tecnico_id);
-    if (!tecnico) {
-      return volverConError('El tecnico elegido no es valido');
     }
     if (operadorIds.length === 0) {
       return volverConError('Debe indicar al menos un operador');
@@ -360,11 +359,12 @@ module.exports = function (db) {
     }
 
     const actualizarRegistro = db.transaction(() => {
+      // SERGIO 2026-09-18: no se toca tecnico_id, queda igual a como se guardo originalmente.
       db.prepare(
-        `UPDATE registros_visita SET cliente_id = ?, direccion_id = ?, tecnico_id = ?,
+        `UPDATE registros_visita SET cliente_id = ?, direccion_id = ?,
          horario_ingreso = ?, horario_salida = ?, observaciones = ?, updated_at = datetime('now')
          WHERE id = ?`
-      ).run(cliente_id, direccion_id, tecnico_id, horario_ingreso, horario_salida, observaciones || null, req.params.id);
+      ).run(cliente_id, direccion_id, horario_ingreso, horario_salida, observaciones || null, req.params.id);
 
       db.prepare('DELETE FROM registro_operadores WHERE registro_id = ?').run(req.params.id);
       const insertarOperador = db.prepare('INSERT INTO registro_operadores (registro_id, operador_id) VALUES (?, ?)');

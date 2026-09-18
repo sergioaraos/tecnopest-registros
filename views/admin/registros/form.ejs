@@ -19,13 +19,6 @@
   </select>
   <p style="font-size:12px;color:#666;margin-top:2px;">La direccion debe pertenecer al cliente elegido arriba.</p>
 
-  <label for="tecnico_id">Tecnico</label>
-  <select name="tecnico_id" id="tecnico_id" required>
-    <% tecnicos.forEach(function(t) { %>
-      <option value="<%= t.id %>" <%= String(registro.tecnico_id) === String(t.id) ? 'selected' : '' %>><%= t.nombre %></option>
-    <% }) %>
-  </select>
-
   <label for="horario-ingreso">Horario de ingreso</label>
   <input type="datetime-local" name="horario_ingreso" id="horario-ingreso" value="<%= registro.horario_ingreso %>" required>
 
