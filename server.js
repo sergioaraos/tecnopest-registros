@@ -126,8 +126,15 @@ app.post('/logout', (req, res) => {
   });
 });
 
+// SERGIO 2026-09-18: la ruta "/" quedaba desde la primera prueba del proyecto (antes de que
+// existiera el login) y no revisaba la sesion, por eso mostraba un texto fijo en vez de llevar
+// al login. Ahora redirige igual que /login: con sesion activa va al panel segun el rol, sin
+// sesion va al login.
 app.get('/', (req, res) => {
-  res.send('TecnoPest Registros funcionando. Version ' + COMMIT + ', servidor iniciado ' + INICIO_SERVIDOR);
+  if (req.session && req.session.usuarioId) {
+    return res.redirect(destinoSegunRol(req.session.rol));
+  }
+  res.redirect('/login');
 });
 
 // SERGIO 2026-09-16: ruta de prueba para verificar que la sesion y el login funcionan,
