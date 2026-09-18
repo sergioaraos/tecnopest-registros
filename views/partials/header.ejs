@@ -71,8 +71,11 @@
     <a href="/admin/clientes">Clientes</a>
     <a href="/admin/registros">Registros</a>
     <a href="/admin/productos">Productos</a>
-    <a href="/admin/tipos-servicio">Tipos de servicio</a>
-    <a href="/admin/operadores">Operadores</a>
+    <% if (typeof rolActual !== 'undefined' && rolActual === 'administrador') { %>
+      <a href="/admin/tipos-servicio">Tipos de servicio</a>
+      <a href="/admin/operadores">Operadores</a>
+      <a href="/admin/usuarios">Usuarios</a>
+    <% } %>
     <form method="POST" action="/logout" class="salir-form">
       <button type="submit" style="background:none;border:none;color:#fff;text-decoration:underline;cursor:pointer;font-size:14px;padding:0;">Cerrar sesion</button>
     </form>

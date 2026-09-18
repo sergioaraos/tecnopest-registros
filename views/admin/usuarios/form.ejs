@@ -1,0 +1,23 @@
+<%# SERGIO 2026-09-18: formulario para crear/editar un usuario tecnico o administrativo. %>
+<%# La contrasena es obligatoria al crear; al editar, dejarla en blanco significa no cambiarla. %>
+<%- include('../../partials/header', { titulo: usuario.id ? 'Editar usuario' : 'Nuevo usuario' }) %>
+<h1><%= usuario.id ? 'Editar usuario' : 'Nuevo usuario' %></h1>
+<% if (error) { %><div class="error"><%= error %></div><% } %>
+<form class="formulario" method="POST" action="<%= usuario.id ? '/admin/usuarios/' + usuario.id : '/admin/usuarios' %>">
+  <label>Nombre *</label>
+  <input type="text" name="nombre" value="<%= usuario.nombre || '' %>" required>
+  <label>Email *</label>
+  <input type="email" name="email" value="<%= usuario.email || '' %>" required>
+  <label>Rol *</label>
+  <select name="rol" required>
+    <option value="tecnico" <%= usuario.rol === 'tecnico' ? 'selected' : '' %>>Tecnico</option>
+    <option value="administrativo" <%= usuario.rol === 'administrativo' ? 'selected' : '' %>>Administrativo</option>
+  </select>
+  <label><%= usuario.id ? 'Nueva contrasena (dejar en blanco para no cambiarla)' : 'Contrasena *' %></label>
+  <input type="password" name="password" <%= usuario.id ? '' : 'required' %> autocomplete="new-password">
+  <div class="botones">
+    <button type="submit">Guardar</button>
+    <a class="boton secundario" href="/admin/usuarios">Cancelar</a>
+  </div>
+</form>
+<%- include('../../partials/footer') %>

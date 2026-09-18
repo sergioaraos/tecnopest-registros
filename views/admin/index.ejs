@@ -61,6 +61,7 @@
     </span>
     Productos
   </a>
+  <% if (typeof rolActual !== 'undefined' && rolActual === 'administrador') { %>
   <a class="tarjeta-inicio" href="/admin/tipos-servicio">
     <span class="icono">
       <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
@@ -84,6 +85,7 @@
     </span>
     Operadores
   </a>
+  <% } %>
   <a class="tarjeta-inicio" href="/admin/registros">
     <span class="icono">
       <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
@@ -95,5 +97,16 @@
     </span>
     Registros de visita
   </a>
+  <% if (typeof rolActual !== 'undefined' && rolActual === 'administrador') { %>
+  <a class="tarjeta-inicio" href="/admin/usuarios">
+    <span class="icono">
+      <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="8" r="4"/>
+        <path d="M4 21v-1a8 8 0 0 1 16 0v1"/>
+      </svg>
+    </span>
+    Usuarios
+  </a>
+  <% } %>
 </div>
 <%- include('../partials/footer') %>

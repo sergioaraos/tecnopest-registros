@@ -80,6 +80,15 @@ app.use(session({
   }
 }));
 
+// SERGIO 2026-09-18: rol de la sesion actual disponible en todas las vistas, para mostrar u
+// ocultar menus segun corresponda (administrador vs administrativo vs tecnico). Tiene que ir
+// despues de app.use(session(...)), porque recien ahi existe req.session; antes de eso
+// siempre quedaba null y por eso administrador tambien veia el menu reducido.
+app.use((req, res, next) => {
+  res.locals.rolActual = req.session ? req.session.rol : null;
+  next();
+});
+
 app.use('/auth', authRoutes);
 app.use('/certificados', certificadosRoutes);
 app.use('/admin', adminRoutes);
@@ -89,8 +98,10 @@ app.use('/tecnico', tecnicoRoutes);
 // API JSON en /auth, para poder usar las pantallas de administracion.
 // SERGIO 2026-09-17: el destino tras iniciar sesion depende del rol: el administrador va al
 // panel de catalogos, el tecnico va a su propio historial de registros.
+// SERGIO 2026-09-18: administrativo entra al mismo panel que administrador (con menu
+// reducido, ver partials/header.ejs y admin/index.ejs), solo tecnico va a /tecnico.
 function destinoSegunRol(rol) {
-  return rol === 'administrador' ? '/admin' : '/tecnico';
+  return rol === 'tecnico' ? '/tecnico' : '/admin';
 }
 
 app.get('/login', (req, res) => {

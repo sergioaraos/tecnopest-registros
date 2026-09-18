@@ -2,12 +2,22 @@
 // catalogos que el tecnico usara en el formulario de Registro de Visita: clientes,
 // direcciones, tipos de servicio, productos y operadores.
 const express = require('express');
+const bcrypt = require('bcryptjs');
 const { requireAuth, requireRole } = require('../middleware/auth');
 
 module.exports = function (db) {
   const router = express.Router();
 
-  router.use(requireAuth, requireRole('administrador'));
+  // SERGIO 2026-09-18: el panel de administracion queda abierto a administrador y
+  // administrativo por igual (clientes, direcciones, productos, registros). Tipos de
+  // servicio, operadores y usuarios quedan restringidos solo a administrador, con el
+  // guardia soloAdministrador aplicado por prefijo de ruta.
+  router.use(requireAuth, requireRole(['administrador', 'administrativo']));
+
+  const soloAdministrador = requireRole('administrador');
+  router.use('/tipos-servicio', soloAdministrador);
+  router.use('/operadores', soloAdministrador);
+  router.use('/usuarios', soloAdministrador);
 
   router.get('/', (req, res) => {
     res.render('admin/index', { titulo: 'Inicio' });
@@ -371,6 +381,91 @@ module.exports = function (db) {
     actualizarRegistro();
 
     res.redirect('/admin/registros');
+  });
+
+  // --- Usuarios (tecnicos y administrativos) ---
+  // SERGIO 2026-09-18: pantalla para que el administrador cree y mantenga cuentas de tecnico
+  // y administrativo. La cuenta de administrador sigue sin poder crearse ni editarse desde
+  // aca (se maneja por variable de entorno en Cloudways), para no arriesgar quedarse sin
+  // acceso si algo sale mal en esta pantalla.
+  router.get('/usuarios', (req, res) => {
+    const usuarios = db.prepare(
+      "SELECT * FROM usuarios WHERE rol IN ('tecnico', 'administrativo') ORDER BY nombre"
+    ).all();
+    res.render('admin/usuarios/list', { usuarios, error: req.query.error || null });
+  });
+
+  router.get('/usuarios/nuevo', (req, res) => {
+    res.render('admin/usuarios/form', { usuario: {}, error: null });
+  });
+
+  router.post('/usuarios', (req, res) => {
+    const { nombre, email, password, rol } = req.body;
+    if (!nombre || !email || !password || !rol) {
+      return res.render('admin/usuarios/form', { usuario: req.body, error: 'Todos los campos son obligatorios' });
+    }
+    if (rol !== 'tecnico' && rol !== 'administrativo') {
+      return res.render('admin/usuarios/form', { usuario: req.body, error: 'Rol invalido' });
+    }
+    try {
+      const passwordHash = bcrypt.hashSync(password, 10);
+      db.prepare(
+        'INSERT INTO usuarios (nombre, email, password_hash, rol) VALUES (?, ?, ?, ?)'
+      ).run(nombre, email, passwordHash, rol);
+      res.redirect('/admin/usuarios');
+    } catch (err) {
+      res.render('admin/usuarios/form', { usuario: req.body, error: 'No se pudo guardar: ' + err.message });
+    }
+  });
+
+  router.get('/usuarios/:id/editar', (req, res) => {
+    const usuario = db.prepare('SELECT * FROM usuarios WHERE id = ?').get(req.params.id);
+    if (!usuario || usuario.rol === 'administrador') return res.status(404).send('Usuario no encontrado');
+    res.render('admin/usuarios/form', { usuario, error: null });
+  });
+
+  router.post('/usuarios/:id', (req, res) => {
+    const usuarioActual = db.prepare('SELECT * FROM usuarios WHERE id = ?').get(req.params.id);
+    if (!usuarioActual || usuarioActual.rol === 'administrador') return res.status(404).send('Usuario no encontrado');
+
+    const { nombre, email, password, rol } = req.body;
+    if (!nombre || !email || !rol) {
+      return res.render('admin/usuarios/form', {
+        usuario: Object.assign({ id: req.params.id }, req.body),
+        error: 'Nombre, email y rol son obligatorios'
+      });
+    }
+    if (rol !== 'tecnico' && rol !== 'administrativo') {
+      return res.render('admin/usuarios/form', {
+        usuario: Object.assign({ id: req.params.id }, req.body),
+        error: 'Rol invalido'
+      });
+    }
+    try {
+      if (password) {
+        const passwordHash = bcrypt.hashSync(password, 10);
+        db.prepare(
+          `UPDATE usuarios SET nombre = ?, email = ?, rol = ?, password_hash = ?, updated_at = datetime('now') WHERE id = ?`
+        ).run(nombre, email, rol, passwordHash, req.params.id);
+      } else {
+        db.prepare(
+          `UPDATE usuarios SET nombre = ?, email = ?, rol = ?, updated_at = datetime('now') WHERE id = ?`
+        ).run(nombre, email, rol, req.params.id);
+      }
+      res.redirect('/admin/usuarios');
+    } catch (err) {
+      res.render('admin/usuarios/form', {
+        usuario: Object.assign({ id: req.params.id }, req.body),
+        error: 'No se pudo guardar: ' + err.message
+      });
+    }
+  });
+
+  router.post('/usuarios/:id/toggle-activo', (req, res) => {
+    const usuario = db.prepare('SELECT * FROM usuarios WHERE id = ?').get(req.params.id);
+    if (!usuario || usuario.rol === 'administrador') return res.status(404).send('Usuario no encontrado');
+    db.prepare('UPDATE usuarios SET activo = ? WHERE id = ?').run(usuario.activo ? 0 : 1, req.params.id);
+    res.redirect('/admin/usuarios');
   });
 
   return router;
