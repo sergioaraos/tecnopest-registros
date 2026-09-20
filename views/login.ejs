@@ -2,31 +2,75 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+<%# SERGIO 2026-09-20: aplica el tema guardado antes de pintar la pagina, para evitar el
+parpadeo del tema equivocado. El resto de la logica esta en /js/tema.js. %>
+<script>
+(function () {
+  try {
+    var t = localStorage.getItem('tema');
+    if (t === 'claro' || t === 'oscuro') {
+      document.documentElement.setAttribute('data-theme', t === 'oscuro' ? 'dark' : 'light');
+    }
+  } catch (e) {}
+})();
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Iniciar sesion - TecnoPest Registros</title>
 <style>
+  <%# SERGIO 2026-09-20: variables de color para modo claro/oscuro/sistema, ver
+  partials/header.ejs para el detalle. El fondo detras de la caja de login se deja fijo
+  (oscuro), es el mismo diseno de siempre para que el logo contraste bien; lo que cambia
+  con el tema es la caja blanca. %>
+  :root {
+    --tarjeta-bg: #fff; --texto: #222; --input-bg: #fff; --input-borde: #ccc;
+  }
+  @media (prefers-color-scheme: dark) {
+    html:not([data-theme]) {
+      --tarjeta-bg: #262626; --texto: #eee; --input-bg: #333; --input-borde: #555;
+    }
+  }
+  html[data-theme="dark"] {
+    --tarjeta-bg: #262626; --texto: #eee; --input-bg: #333; --input-borde: #555;
+  }
   <%# SERGIO 2026-09-17: fondo oscuro (como en la firma de correo) para que el logo con
   degradado verde de la "t" se vea con buen contraste. %>
   body {
     font-family: system-ui, sans-serif; background: #121212; margin: 0; display: flex;
     flex-direction: column; min-height: 100vh; align-items: center; justify-content: center;
   }
-  .caja { background: #fff; padding: 28px; border-radius: 10px; width: 100%; max-width: 340px; box-sizing: border-box; box-shadow: 0 8px 24px rgba(0,0,0,0.35); }
-  h1 { font-size: 18px; margin-top: 0; }
-  label { display: block; margin-top: 12px; font-size: 14px; font-weight: bold; }
-  input { width: 100%; padding: 8px; margin-top: 4px; box-sizing: border-box; font-size: 14px; }
+  .caja { background: var(--tarjeta-bg); color: var(--texto); padding: 28px; border-radius: 10px; width: 100%; max-width: 340px; box-sizing: border-box; box-shadow: 0 8px 24px rgba(0,0,0,0.35); }
+  <%# SERGIO 2026-09-20: se agrandan un poco los textos, quedaban muy chicos en celular. %>
+  h1 { font-size: 19px; margin-top: 0; }
+  label { display: block; margin-top: 12px; font-size: 15px; font-weight: bold; }
+  input {
+    width: 100%; padding: 10px; margin-top: 4px; box-sizing: border-box; font-size: 16px;
+    background: var(--input-bg); color: var(--texto); border: 1px solid var(--input-borde); border-radius: 4px;
+  }
+  <%# SERGIO 2026-09-20: selector de tema, ver header.ejs para el detalle. Va fijo en la
+  esquina porque esta pantalla no tiene menu de navegacion. %>
+  .selector-tema { position: fixed; top: 12px; right: 12px; display: flex; gap: 4px; background: rgba(0,0,0,0.3); padding: 4px; border-radius: 6px; }
+  .boton-tema {
+    background: transparent; border: 1px solid rgba(255,255,255,0.35); color: #fff;
+    padding: 4px 9px; border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: 600;
+  }
+  .boton-tema.activo { background: linear-gradient(135deg, #8fd85b, #2ea34a); border-color: #2ea34a; color: #0d2818; }
   <%# SERGIO 2026-09-17: verde degradado tomado del logo real de TecnoPest (la "t"). %>
   button {
     margin-top: 18px; width: 100%; background: linear-gradient(135deg, #8fd85b, #2ea34a);
     color: #0d2818; font-weight: 600; border: none; padding: 11px; border-radius: 6px;
-    font-size: 14px; cursor: pointer; transition: transform 0.1s ease;
+    font-size: 16px; cursor: pointer; transition: transform 0.1s ease;
   }
   button:hover { transform: translateY(-1px); }
   .error { background: #ffebee; color: #b71c1c; padding: 8px 12px; margin-bottom: 12px; border-radius: 4px; font-size: 14px; }
 </style>
 </head>
 <body>
+<div class="selector-tema" role="group" aria-label="Tema">
+  <button type="button" class="boton-tema" data-tema="claro">C</button>
+  <button type="button" class="boton-tema" data-tema="oscuro">O</button>
+  <button type="button" class="boton-tema" data-tema="sistema">S</button>
+</div>
 <div class="caja">
   <img src="/img/logo.png" alt="TecnoPest" style="height:64px;display:block;margin:0 auto 12px;">
   <h1 style="text-align:center;">Registros</h1>
@@ -45,5 +89,6 @@
   en cada despliegue y sirve para confirmar que un redeploy quedo activo. %>
   Version <%= typeof version !== 'undefined' ? version : 'desconocida' %> (servidor iniciado <%= typeof inicioServidor !== 'undefined' ? inicioServidor : 'desconocido' %>)
 </footer>
+<script src="/js/tema.js" defer></script>
 </body>
 </html>

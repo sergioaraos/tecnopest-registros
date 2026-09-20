@@ -2,17 +2,53 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+<%# SERGIO 2026-09-20: aplica el tema guardado (si el usuario eligio claro u oscuro a mano)
+antes de pintar la pagina, para evitar el parpadeo del tema equivocado. El resto de la
+logica del selector de tema esta en /js/tema.js, compartido por las 3 pantallas. %>
+<script>
+(function () {
+  try {
+    var t = localStorage.getItem('tema');
+    if (t === 'claro' || t === 'oscuro') {
+      document.documentElement.setAttribute('data-theme', t === 'oscuro' ? 'dark' : 'light');
+    }
+  } catch (e) {}
+})();
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title><%= titulo %> - TecnoPest Registros</title>
 <style>
+  <%# SERGIO 2026-09-20: variables de color para modo claro/oscuro/sistema. Sin data-theme
+  en <html> se sigue la configuracion del celular o PC (modo "sistema"); con
+  data-theme="dark" o "light" se fuerza el modo elegido por el usuario, guardado en su
+  navegador. %>
+  :root {
+    --bg: #f5f5f5; --texto: #222; --tarjeta-bg: #fff; --borde: #ddd;
+    --input-bg: #fff; --input-borde: #ccc; --sombra: rgba(0,0,0,0.08);
+  }
+  @media (prefers-color-scheme: dark) {
+    html:not([data-theme]) {
+      --bg: #1a1a1a; --texto: #eee; --tarjeta-bg: #262626; --borde: #3a3a3a;
+      --input-bg: #333; --input-borde: #555; --sombra: rgba(0,0,0,0.4);
+    }
+  }
+  html[data-theme="dark"] {
+    --bg: #1a1a1a; --texto: #eee; --tarjeta-bg: #262626; --borde: #3a3a3a;
+    --input-bg: #333; --input-borde: #555; --sombra: rgba(0,0,0,0.4);
+  }
+  <%# SERGIO 2026-09-20: cualquier input/select/textarea de la pagina cambia de color con el
+  tema, no solo los que estan dentro de un formulario con clase "formulario" (por ejemplo el
+  filtro de cliente en Registros). %>
+  input, select, textarea { background: var(--input-bg); color: var(--texto); border: 1px solid var(--input-borde); border-radius: 4px; }
+  select { -webkit-appearance: none; -moz-appearance: none; appearance: none; }
   <%# SERGIO 2026-09-17: verde degradado tomado del logo real de TecnoPest (la "t"), de
   claro #8fd85b a oscuro #2ea34a. La barra de navegacion es oscura (como el fondo de la
   firma de correo) para que el logo se vea con buen contraste; antes se perdia porque el
   fondo azul era muy parecido al del logo. %>
   body {
     --verde-claro: #8fd85b; --verde-oscuro: #2ea34a;
-    font-family: system-ui, sans-serif; margin: 0; background: #f5f5f5; color: #222;
+    font-family: system-ui, sans-serif; margin: 0; background: var(--bg); color: var(--texto);
   }
   nav {
     background: #121212; color: #fff; padding: 12px 20px; display: flex; flex-wrap: wrap;
@@ -22,6 +58,14 @@
   nav a:hover { opacity: 1; color: var(--verde-claro); }
   nav .marca { font-weight: bold; margin-right: 16px; color: #fff; text-decoration: none; transition: color 0.15s; }
   nav .marca:hover { color: var(--verde-claro); }
+  <%# SERGIO 2026-09-20: selector de tema (claro/oscuro/sistema). Siempre va sobre el fondo
+  oscuro de la barra de navegacion, por eso los colores van fijos y no usan las variables. %>
+  .selector-tema { display: flex; gap: 4px; }
+  .boton-tema {
+    background: transparent; border: 1px solid rgba(255,255,255,0.35); color: #fff;
+    padding: 4px 9px; border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: 600;
+  }
+  .boton-tema.activo { background: var(--verde-oscuro); border-color: var(--verde-oscuro); color: #0d2818; }
   <%# SERGIO 2026-09-17: menu colapsable en pantallas angostas (celular). El boton
   hamburguesa solo se ve bajo los 720px, y muestra/oculta .nav-links con una clase. %>
   .nav-links { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; flex: 1; }
@@ -35,16 +79,24 @@
     .nav-links { display: none; flex-direction: column; align-items: flex-start; width: 100%; gap: 12px; margin-top: 12px; flex: none; }
     .nav-links.abierto { display: flex; }
     .salir-form { margin-left: 0; }
+    <%# SERGIO 2026-09-20: en celular los textos quedaban muy chicos y habia que acercar la
+    cara a la pantalla; se agrandan nav, titulos, formularios y botones. %>
+    nav a, nav .marca { font-size: 16px; }
+    h1 { font-size: 22px; }
+    form.formulario label { font-size: 15px; }
+    form.formulario input, form.formulario select, form.formulario textarea { font-size: 16px; padding: 10px; }
+    button, .boton { font-size: 16px; padding: 11px 18px; }
   }
   main { max-width: 900px; margin: 0 auto; padding: 16px; }
   h1 { font-size: 20px; }
-  table { width: 100%; border-collapse: collapse; background: #fff; }
-  th, td { padding: 8px; border-bottom: 1px solid #ddd; text-align: left; font-size: 14px; }
-  .tabla-wrap { overflow-x: auto; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
-  form.formulario { background: #fff; padding: 20px; max-width: 500px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  table { width: 100%; border-collapse: collapse; background: var(--tarjeta-bg); }
+  th, td { padding: 8px; border-bottom: 1px solid var(--borde); text-align: left; font-size: 14px; }
+  .tabla-wrap { overflow-x: auto; border-radius: 8px; box-shadow: 0 1px 4px var(--sombra); }
+  form.formulario { background: var(--tarjeta-bg); padding: 20px; max-width: 500px; border-radius: 8px; box-shadow: 0 1px 4px var(--sombra); }
   form.formulario label { display: block; margin-top: 10px; font-size: 14px; font-weight: bold; }
   form.formulario input, form.formulario select, form.formulario textarea {
     width: 100%; padding: 8px; margin-top: 4px; box-sizing: border-box; font-size: 14px;
+    background: var(--input-bg); color: var(--texto); border: 1px solid var(--input-borde); border-radius: 4px;
   }
   .botones { margin-top: 16px; display: flex; gap: 8px; }
   button, .boton {
@@ -69,17 +121,17 @@
     .solo-desktop { display: none; }
     .texto-completo { display: none; }
     .texto-corto { display: inline; }
-    th, td { padding: 6px 4px; font-size: 13px; }
+    th, td { padding: 6px 4px; font-size: 14px; }
     a.enlace-accion { margin-right: 4px; }
     .pill {
-      display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 600;
+      display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 13px; font-weight: 600;
     }
     .pill-verde { background: #e6f4ea; color: #1f7a37; }
     .pill-gris { background: #eee; color: #666; }
     .pill-rojo { background: #fdecea; color: #b71c1c; }
     a.enlace-accion {
-      display: inline-block; text-decoration: none; padding: 3px 9px; border-radius: 6px;
-      font-size: 12px; font-weight: 600;
+      display: inline-block; text-decoration: none; padding: 4px 10px; border-radius: 6px;
+      font-size: 13px; font-weight: 600;
       background: linear-gradient(135deg, var(--verde-claro), var(--verde-oscuro)); color: #0d2818;
     }
     button.secundario.boton-activar { background: var(--verde-oscuro); color: #fff; }
@@ -90,6 +142,12 @@
 <body>
 <nav>
   <a class="marca" href="/admin"><img src="/img/logo.png" alt="TecnoPest" style="height:32px;vertical-align:middle;margin-right:8px;">Admin</a>
+  <%# SERGIO 2026-09-20: selector de tema, ver /js/tema.js. %>
+  <div class="selector-tema" role="group" aria-label="Tema">
+    <button type="button" class="boton-tema" data-tema="claro"><span class="texto-completo">Claro</span><span class="texto-corto">C</span></button>
+    <button type="button" class="boton-tema" data-tema="oscuro"><span class="texto-completo">Oscuro</span><span class="texto-corto">O</span></button>
+    <button type="button" class="boton-tema" data-tema="sistema"><span class="texto-completo">Sistema</span><span class="texto-corto">S</span></button>
+  </div>
   <button type="button" class="menu-toggle" aria-label="Abrir menu" aria-controls="nav-links" onclick="document.getElementById('nav-links').classList.toggle('abierto')">&#9776;</button>
   <div class="nav-links" id="nav-links">
     <a href="/admin">Inicio</a>
