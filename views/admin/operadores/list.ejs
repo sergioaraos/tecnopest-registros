@@ -9,12 +9,12 @@
 <% operadores.forEach(function(o) { %>
   <tr class="<%= o.activo ? '' : 'inactivo' %>">
     <td><%= o.nombre %></td>
-    <td><%= o.activo ? 'Activo' : 'Inactivo' %></td>
+    <td><span class="pill <%= o.activo ? 'pill-verde' : 'pill-gris' %>"><%= o.activo ? 'Activo' : 'Inactivo' %></span></td>
     <td class="acciones">
-      <a href="/admin/operadores/<%= o.id %>/editar">editar</a>
+      <a class="enlace-accion" href="/admin/operadores/<%= o.id %>/editar"><span class="texto-completo">editar</span><span class="texto-corto">E</span></a>
       <form style="display:inline" method="POST" action="/admin/operadores/<%= o.id %>/toggle-activo">
-        <button type="submit" class="secundario" style="padding:2px 8px;font-size:12px;">
-          <%= o.activo ? 'desactivar' : 'activar' %>
+        <button type="submit" class="secundario <%= o.activo ? 'boton-desactivar' : 'boton-activar' %>" style="padding:2px 8px;font-size:12px;">
+          <span class="texto-completo"><%= o.activo ? 'desactivar' : 'activar' %></span><span class="texto-corto"><%= o.activo ? 'D' : 'A' %></span>
         </button>
       </form>
     </td>
