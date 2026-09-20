@@ -4,20 +4,20 @@
 <p><a class="boton" href="/admin/productos/nuevo">+ Nuevo producto</a></p>
 <div class="tabla-wrap">
 <table>
-<thead><tr><th>Nombre</th><th>Tipo de servicio</th><th>Componente</th><th>Registro ISP</th><th>Estado</th><th></th></tr></thead>
+<thead><tr><th>Nombre</th><th>Tipo de servicio</th><th class="solo-desktop">Componente</th><th class="solo-desktop">Registro ISP</th><th class="solo-desktop">Estado</th><th></th></tr></thead>
 <tbody>
 <% productos.forEach(function(p) { %>
   <tr class="<%= p.activo ? '' : 'inactivo' %>">
     <td><%= p.nombre %></td>
     <td><%= p.tipo_servicio_nombre %></td>
-    <td><%= p.componente_principal || '' %></td>
-    <td><%= p.registro_isp || '' %></td>
-    <td><%= p.activo ? 'Activo' : 'Inactivo' %></td>
+    <td class="solo-desktop"><%= p.componente_principal || '' %></td>
+    <td class="solo-desktop"><%= p.registro_isp || '' %></td>
+    <td class="solo-desktop"><%= p.activo ? 'Activo' : 'Inactivo' %></td>
     <td class="acciones">
-      <a href="/admin/productos/<%= p.id %>/editar">editar</a>
+      <a class="enlace-accion" href="/admin/productos/<%= p.id %>/editar"><span class="texto-completo">editar</span><span class="texto-corto">E</span></a>
       <form style="display:inline" method="POST" action="/admin/productos/<%= p.id %>/toggle-activo">
-        <button type="submit" class="secundario" style="padding:2px 8px;font-size:12px;">
-          <%= p.activo ? 'desactivar' : 'activar' %>
+        <button type="submit" class="secundario <%= p.activo ? 'boton-desactivar' : 'boton-activar' %>" style="padding:2px 8px;font-size:12px;">
+          <span class="texto-completo"><%= p.activo ? 'desactivar' : 'activar' %></span><span class="texto-corto"><%= p.activo ? 'D' : 'A' %></span>
         </button>
       </form>
     </td>

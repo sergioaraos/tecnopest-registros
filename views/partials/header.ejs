@@ -60,6 +60,31 @@
   .inactivo { color: #999; font-style: italic; }
   .acciones a { margin-right: 10px; font-size: 13px; }
   main a:not(.boton) { color: #1f7a37; }
+  <%# SERGIO 2026-09-18: en celular las tablas se simplifican, sin tocar nada en pantallas
+  grandes: se ocultan columnas menos importantes (.solo-desktop), el estado se muestra como
+  una etiqueta de color (.pill) y las acciones (editar/direcciones/activar/desactivar/
+  eliminar) se ven como botones cortos (.texto-corto) en vez de la palabra completa. %>
+  .texto-corto { display: none; }
+  @media (max-width: 720px) {
+    .solo-desktop { display: none; }
+    .texto-completo { display: none; }
+    .texto-corto { display: inline; }
+    th, td { padding: 6px 4px; font-size: 13px; }
+    a.enlace-accion { margin-right: 4px; }
+    .pill {
+      display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 600;
+    }
+    .pill-verde { background: #e6f4ea; color: #1f7a37; }
+    .pill-gris { background: #eee; color: #666; }
+    .pill-rojo { background: #fdecea; color: #b71c1c; }
+    a.enlace-accion {
+      display: inline-block; text-decoration: none; padding: 3px 9px; border-radius: 6px;
+      font-size: 12px; font-weight: 600;
+      background: linear-gradient(135deg, var(--verde-claro), var(--verde-oscuro)); color: #0d2818;
+    }
+    button.secundario.boton-activar { background: var(--verde-oscuro); color: #fff; }
+    button.secundario.boton-desactivar { background: #b71c1c; color: #fff; }
+  }
 </style>
 </head>
 <body>

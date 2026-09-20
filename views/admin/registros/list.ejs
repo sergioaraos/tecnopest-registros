@@ -1,5 +1,7 @@
 <%# SERGIO 2026-09-18: listado de registros de visita, con filtro por cliente. Los registros %>
-<%# ya asociados a un certificado quedan bloqueados para edicion (estado = 'certificado'). %>
+<%# ya asociados a un certificado quedan bloqueados para edicion (estado = 'certificado'). En %>
+<%# celular se ocultan Tecnico e Ingreso ademas de Salida, porque las 6 columnas no caben en %>
+<%# el ancho de un telefono; en pantallas grandes se siguen viendo todas. %>
 <%- include('../../partials/header', { titulo: 'Registros de visita' }) %>
 <h1>Registros de visita</h1>
 <% if (typeof error !== 'undefined' && error) { %><div class="error"><%= error %></div><% } %>
@@ -14,19 +16,19 @@
 </form>
 <div class="tabla-wrap">
 <table>
-<thead><tr><th>Cliente</th><th>Direccion</th><th>Tecnico</th><th>Ingreso</th><th>Salida</th><th>Estado</th><th></th></tr></thead>
+<thead><tr><th>Cliente</th><th>Direccion</th><th class="solo-desktop">Tecnico</th><th class="solo-desktop">Ingreso</th><th class="solo-desktop">Salida</th><th>Estado</th><th></th></tr></thead>
 <tbody>
 <% registros.forEach(function(r) { %>
   <tr>
     <td><%= r.cliente %></td>
     <td><%= r.direccion %><% if (r.comuna) { %>, <%= r.comuna %><% } %></td>
-    <td><%= r.tecnico %></td>
-    <td><%= r.horario_ingreso %></td>
-    <td><%= r.horario_salida %></td>
-    <td><%= r.estado === 'certificado' ? 'certificado' : 'pendiente' %></td>
+    <td class="solo-desktop"><%= r.tecnico %></td>
+    <td class="solo-desktop"><%= r.horario_ingreso %></td>
+    <td class="solo-desktop"><%= r.horario_salida %></td>
+    <td><span class="pill <%= r.estado === 'certificado' ? 'pill-verde' : 'pill-rojo' %>"><%= r.estado === 'certificado' ? 'certificado' : 'pendiente' %></span></td>
     <td class="acciones">
       <% if (r.estado !== 'certificado') { %>
-        <a href="/admin/registros/<%= r.id %>/editar">editar</a>
+        <a class="enlace-accion" href="/admin/registros/<%= r.id %>/editar"><span class="texto-completo">editar</span><span class="texto-corto">E</span></a>
       <% } else { %>
         <span class="inactivo">bloqueado</span>
       <% } %>

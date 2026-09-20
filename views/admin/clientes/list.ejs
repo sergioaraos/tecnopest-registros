@@ -5,21 +5,23 @@
 <p><a class="boton" href="/admin/clientes/nuevo">+ Nuevo cliente</a></p>
 <div class="tabla-wrap">
 <table>
-<thead><tr><th>Razon social</th><th>RUT</th><th>Direcciones</th><th></th></tr></thead>
+<thead><tr><th>Razon social</th><th class="solo-desktop">RUT</th><th>Direcciones</th><th></th></tr></thead>
 <tbody>
 <% clientes.forEach(function(c) { %>
   <tr>
     <td><%= c.razon_social %></td>
-    <td><%= c.rut %></td>
-    <td><a href="/admin/clientes/<%= c.id %>/direcciones">ver direcciones</a></td>
+    <td class="solo-desktop"><%= c.rut %></td>
+    <td><a class="enlace-accion" href="/admin/clientes/<%= c.id %>/direcciones"><span class="texto-completo">ver direcciones</span><span class="texto-corto">Direcciones</span></a></td>
     <td class="acciones">
-      <a href="/admin/clientes/<%= c.id %>/editar">editar</a>
+      <a class="enlace-accion" href="/admin/clientes/<%= c.id %>/editar"><span class="texto-completo">editar</span><span class="texto-corto">E</span></a>
       <%# SERGIO 2026-09-17: eliminar solo esta permitido si el cliente no tiene registros de
       visita ni certificados asociados; la validacion real se hace en el servidor, esto es
       solo la confirmacion antes de enviar el formulario. %>
       <form method="POST" action="/admin/clientes/<%= c.id %>/eliminar" style="display:inline"
         onsubmit="return confirm('Eliminar el cliente ' + <%- JSON.stringify(c.razon_social) %> + '? Esta accion no se puede deshacer.');">
-        <button type="submit" class="peligro" style="padding:2px 8px;font-size:13px;">eliminar</button>
+        <button type="submit" class="peligro" style="padding:2px 8px;font-size:13px;">
+          <span class="texto-completo">eliminar</span><span class="texto-corto">X</span>
+        </button>
       </form>
     </td>
   </tr>
